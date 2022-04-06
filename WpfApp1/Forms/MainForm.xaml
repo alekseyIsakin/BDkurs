@@ -1,0 +1,18 @@
+﻿<Window x:Class="WpfApp1.Forms.MainForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1.Forms"
+        mc:Ignorable="d"
+        Title="Main" Height="450" Width="800">
+    <Grid >
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="file"></MenuItem>
+            <MenuItem Header="games">
+                <MenuItem Click="edit_game_click" Header="edit game info"></MenuItem>
+                <MenuItem Click="edit_publisher_click" Header="edit publisher info"></MenuItem>
+            </MenuItem>
+        </Menu>
+    </Grid>
+</Window>

@@ -1,0 +1,27 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="230" Width="280" WindowStyle="SingleBorderWindow">
+    <Grid Margin="10,0,10,9">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="35*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Nick" VerticalAlignment="Center" Height="28" Margin="10,0,16,0"/>
+        <TextBox x:Name="NickTextBox" Text="" Height="27" TextWrapping="Wrap" MaxLength="25" Grid.Column="1" Margin="10,0,10,0" VerticalAlignment="Center" />
+        <TextBox x:Name="PasswTextBox" Text="" Height="27" TextWrapping="Wrap" VerticalAlignment="Center" MaxLength="25" Grid.Column="1" Grid.Row="1" Margin="10,0,10,0"/>
+        <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Width="64" Grid.Row="1" Margin="10,18,0,0"/>
+        <Button Content="LogIn" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="150" Grid.Column="1" Height="20" Grid.Row="2" Click="LogIn_Click"/>
+        <Button Content="SignIn" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Top" Height="20" Width="150" FontStretch="Expanded" Grid.Row="2" Grid.Column="1" Click="SignIn_Click"/>
+        <Image x:Name="state_image" HorizontalAlignment="Left" Height="51" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Width="54" Source="/Forms/loading.png"/>
+    </Grid>
+</Window>
