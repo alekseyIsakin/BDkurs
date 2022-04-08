@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media.Imaging;
 using System;
+using WpfApp1.DBcore;
 
 namespace WpfApp1
 {
@@ -9,13 +10,27 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        DBcore.DBreader dbreader = new();
         public MainWindow()
         {
             InitializeComponent();
             
-            if (dbreader.IsCreate == false)
-                dbreader.Create();
+            if (DBreader.IsCreate == false)
+                DBreader.Create();
+            Forms.playground pg = new();
+            pg.Show();
+            DBreader.Add_new_game("Elden Ring", "2022/2/25");
+            DBreader.Add_new_game("Titanfall 2", "2016/10/28");
+            DBreader.Add_new_game("METAL GEAR RISING: REVENGEANCE", "2014/1/10");
+            DBreader.Add_new_game("Tales of Berseria", "2017/1/27");
+
+            DBreader.Add_new_publisher("Bandai Namco Entertainment");
+            DBreader.Add_new_publisher("Electronic Arts");
+            DBreader.Add_new_publisher("Konami");
+
+            DBreader.Bound_game_publisher(1, 1);
+            DBreader.Bound_game_publisher(2, 2);
+            DBreader.Bound_game_publisher(3, 3);
+            DBreader.Bound_game_publisher(4, 1);
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)
@@ -23,7 +38,7 @@ namespace WpfApp1
             string nick = NickTextBox.Text;
             string passw = PasswTextBox.Text;
 
-            bool result = dbreader.LogIn(nick, passw);
+            bool result = DBreader.LogIn(nick, passw);
 
             if (result)
             {
@@ -40,7 +55,7 @@ namespace WpfApp1
             string nick = NickTextBox.Text;
             string passw = PasswTextBox.Text;
 
-            bool result = dbreader.SignIn(nick, passw);
+            bool result = DBreader.SignIn(nick, passw);
 
             if (result)
             {

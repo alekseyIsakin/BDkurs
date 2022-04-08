@@ -1,0 +1,21 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1.Forms"
+        xmlns:DBcore="clr-namespace:WpfApp1.DBcore" x:Class="WpfApp1.Forms.playground"
+        mc:Ignorable="d"
+    
+        Title="playground" Height="450" Width="800">
+
+    <Grid>
+        <DataGrid Name="GameGrid" ItemsSource="{Binding}" HorizontalAlignment="Left" Height="395" AutoGenerateColumns="False" VerticalAlignment="Center" Width="730">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path=ID}" Header="games"></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Name}" Header="games"></DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>
