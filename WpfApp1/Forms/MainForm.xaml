@@ -7,12 +7,21 @@
         mc:Ignorable="d"
         Title="Main" Height="450" Width="800">
     <Grid >
-        <Menu VerticalAlignment="Top">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="11*"/>
+            <ColumnDefinition Width="69*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Menu VerticalAlignment="Top" Grid.ColumnSpan="2" Height="18">
             <MenuItem Header="file"></MenuItem>
             <MenuItem Header="games">
                 <MenuItem Click="edit_game_click" Header="edit game info"></MenuItem>
                 <MenuItem Click="edit_publisher_click" Header="edit publisher info"></MenuItem>
             </MenuItem>
         </Menu>
+        
+        <ListBox Name="MyGamesList">
+            
+        </ListBox>
     </Grid>
 </Window>

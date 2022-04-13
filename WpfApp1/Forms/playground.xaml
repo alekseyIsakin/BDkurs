@@ -14,6 +14,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Path=ID}" Header="games"></DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding Path=Name}" Header="games"></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Publishers.Count}" Header="games"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
 

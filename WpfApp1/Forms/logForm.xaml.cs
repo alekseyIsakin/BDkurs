@@ -16,21 +16,27 @@ namespace WpfApp1
             
             if (DBreader.IsCreate == false)
                 DBreader.Create();
-            Forms.playground pg = new();
-            pg.Show();
-            DBreader.Add_new_game("Elden Ring", "2022/2/25");
-            DBreader.Add_new_game("Titanfall 2", "2016/10/28");
-            DBreader.Add_new_game("METAL GEAR RISING: REVENGEANCE", "2014/1/10");
-            DBreader.Add_new_game("Tales of Berseria", "2017/1/27");
+            //Forms.playground pg = new();
+            //pg.Show();
+            //DBreader.Add_new_game("Elden Ring", "2022/2/25");
+            //DBreader.Add_new_game("Titanfall 2", "2016/10/28");
+            //DBreader.Add_new_game("METAL GEAR RISING: REVENGEANCE", "2014/1/10");
+            //DBreader.Add_new_game("Tales of Berseria", "2017/1/27");
 
-            DBreader.Add_new_publisher("Bandai Namco Entertainment");
-            DBreader.Add_new_publisher("Electronic Arts");
-            DBreader.Add_new_publisher("Konami");
+            //DBreader.Add_new_publisher("Bandai Namco Entertainment");
+            //DBreader.Add_new_publisher("Electronic Arts");
+            //DBreader.Add_new_publisher("Konami");
 
-            DBreader.Bound_game_publisher(1, 1);
-            DBreader.Bound_game_publisher(2, 2);
-            DBreader.Bound_game_publisher(3, 3);
-            DBreader.Bound_game_publisher(4, 1);
+            //DBreader.Bound_game_publisher(1, 1);
+            //DBreader.Bound_game_publisher(2, 2);
+            //DBreader.Bound_game_publisher(3, 3);
+            //DBreader.Bound_game_publisher(4, 1);
+
+            //DBreader.My_new_game(1, 1);
+            //DBreader.My_new_game(2, 1);
+            //DBreader.My_new_game(3, 1);
+            //DBreader.My_new_game(1, 2);
+            //DBreader.My_new_game(4, 2);
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)
@@ -42,7 +48,8 @@ namespace WpfApp1
 
             if (result)
             {
-                Forms.MainForm new_form = new(nick, this);
+                var p = DBreader.Get_profile(nick);
+                Forms.MainForm new_form = new(p, this);
                 new_form.Show();
             }
             else
@@ -59,7 +66,8 @@ namespace WpfApp1
 
             if (result)
             {
-                Forms.MainForm new_form = new(nick, this);
+                var p = DBreader.Get_profile(nick);
+                Forms.MainForm new_form = new(p, this);
                 new_form.Show();
             }
             else
