@@ -25,10 +25,13 @@ namespace WpfApp1.DBcore
         public const string _title = "title";
         public const string _id = "id";
         public const string _relese_date = "release_date";
+        public const string _descr = "description";
+
         public string? Title { get; set; }
         public string? Relese_date { get; set; }
         public int? ID { get; set; }
         public List<Publisher>? Publishers { get; set; }
+        public string? Descriptions { get; set; }
     }
     public struct Publisher
     {
@@ -51,6 +54,7 @@ namespace WpfApp1.DBcore
         public const string _game_infos = "game_infos";
         public static string _game_id { get => GamePublisher._game_id; }
         public const string _profile_id = "profile_id";
+        public const string _status = "status";
         public const string _executable_file = "executable_file";
         public const string _save_file = "save_file";
         public const string _time_in_game = "time_in_game";
@@ -66,19 +70,12 @@ namespace WpfApp1.DBcore
 
     public static class DBreader
     {
-        private const string _table_games = "games";
-        private static readonly string db_name = "data.db";
+        public static readonly string db_name = "data.db";
         private static readonly string connectStr;
         private static string connectedNick = "";
 
 
-        public static bool IsCreate
-        {
-            get
-            {
-                return System.IO.File.Exists(db_name);
-            }
-        }
+        public static bool IsCreate => System.IO.File.Exists(db_name);
 
         static DBreader()
         {
@@ -97,6 +94,7 @@ namespace WpfApp1.DBcore
             string createTableGames = @$"CREATE TABLE {Game._games}(
 											{Game._id} INTEGER PRIMARY KEY AUTOINCREMENT, 
 											{Game._title} TEXT NOT NULL UNIQUE,
+											{Game._descr} TEXT,
 											{Game._relese_date} TEXT);";
 
             string createTableGameIfo = @$"CREATE TABLE {GameInfo._game_infos}(
@@ -183,7 +181,8 @@ namespace WpfApp1.DBcore
         static public bool SignIn(string nick, string passw)
         {
             if (Check_profile_by_name(nick) || nick == "")
-                throw new Exception($"This nick [{nick}] is already used");
+                return false;
+                //throw new Exception($"This nick [{nick}] is already used");
 
             string sign_in_mode = connectStr + "Mode=ReadWrite;";
             string sign_in_expression = $"INSERT INTO {Profile._profiles} ({Profile._name}, {Profile._passw_hash}) " +
@@ -271,7 +270,11 @@ namespace WpfApp1.DBcore
         static public bool Add_new_publisher(string name)
         {
             if (Check_publisher_by_name(name))
+#if DEBUG
                 throw new Exception($"This name [{name}] is already used");
+#else
+                return false;
+#endif
 
             string new_publisher_expression = $"INSERT INTO {Publisher._publisher} ({Publisher._name}) VALUES (@name)";
 
@@ -292,9 +295,11 @@ namespace WpfApp1.DBcore
             }
             return true;
         }
-        static public bool Add_new_game(string title, string date_MM_DD_GGGG)
+        static public bool Add_new_game(string title, string date_MM_DD_GGGG, string descr="")
         {
-            string new_game_expression = $"INSERT INTO {Game._games} ({Game._title}, {Game._relese_date}) VALUES (@title, @release_date)";
+            string new_game_expression = $"INSERT INTO {Game._games} " +
+                $"({Game._title}, {Game._relese_date}, {Game._descr}) " +
+                $"VALUES (@title, @release_date, @descr);";
 
             using (var connection = new SqliteConnection(connectStr))
             {
@@ -308,8 +313,10 @@ namespace WpfApp1.DBcore
 
                 SqliteParameter paramNick = new("@title", title);
                 SqliteParameter paramHash = new("@release_date", date_MM_DD_GGGG);
+                SqliteParameter paramDescr = new("@descr", descr);
                 command.Parameters.Add(paramNick);
                 command.Parameters.Add(paramHash);
+                command.Parameters.Add(paramDescr);
 
                 command.ExecuteNonQuery();
             }
@@ -340,9 +347,9 @@ namespace WpfApp1.DBcore
             }
             return true;
         }
-        #endregion
+#endregion
 
-        #region set profile game
+#region set profile game
 
         static public void My_new_game(int game_id, int profile_id) 
         {
@@ -370,9 +377,9 @@ namespace WpfApp1.DBcore
             }
         }
 
-        #endregion
+#endregion
 
-        #region Get Data
+#region Get Data
         static public Profile Get_profile(string nick) 
         {
             string expression = $"SELECT {Profile._id} FROM {Profile._profiles} " +
@@ -429,6 +436,7 @@ namespace WpfApp1.DBcore
                     {
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
+                        Descriptions = gamesReader[Game._descr].ToString(),
                     };
 
                     games.Add(gm);
@@ -473,6 +481,7 @@ namespace WpfApp1.DBcore
                     {
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
+                        Descriptions = gamesReader[Game._descr].ToString(),
                     };
                 }
             }
@@ -595,6 +604,6 @@ namespace WpfApp1.DBcore
             return games;
         }
 
-        #endregion
+#endregion
     }
 }

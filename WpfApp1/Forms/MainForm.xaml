@@ -5,23 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1.Forms"
         mc:Ignorable="d"
+        Closed="Window_Closed"
         Title="Main" Height="450" Width="800">
     <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="328*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="11*"/>
-            <ColumnDefinition Width="69*"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        
-        <Menu VerticalAlignment="Top" Grid.ColumnSpan="2" Height="18">
+
+        <Menu VerticalAlignment="Center" 
+              Grid.ColumnSpan="2" Height="18">
             <MenuItem Header="file"></MenuItem>
             <MenuItem Header="games">
                 <MenuItem Click="edit_game_click" Header="edit game info"></MenuItem>
                 <MenuItem Click="edit_publisher_click" Header="edit publisher info"></MenuItem>
             </MenuItem>
         </Menu>
-        
-        <ListBox Name="MyGamesList">
-            
-        </ListBox>
+
+        <DockPanel Grid.Row="1" Margin="3" Grid.Column="0" Grid.RowSpan="2">
+            <RadioButton Content="Only my games" Margin="3" DockPanel.Dock="Top"
+                         Click="ToggleMyGamesList_Click"/>
+            <ListBox Name="MyGamesList" DockPanel.Dock="Top"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
+            <Label Name="labelGameTitle" Content="Game-title" DockPanel.Dock="Top"/>
+            <TextBlock Name="textDescription" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="3"/>
+        </DockPanel>
+
     </Grid>
 </Window>
