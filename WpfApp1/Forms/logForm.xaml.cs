@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls.Ribbon;
 using System.Windows.Media.Imaging;
 using System;
 using WpfApp1.DBcore;
@@ -8,8 +9,17 @@ namespace WpfApp1
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : RibbonWindow
     {
+        private string _nickTextBox { get => NickTextBox.Text; }
+        private string _passwTextBox { get => PasswTextBox.Text; }
+
+        private void Reset() 
+        {
+            NickTextBox.Clear();
+            PasswTextBox.Clear();
+        }
+
         public void recreate() 
         {
             if (DBreader.IsCreate)
@@ -23,51 +33,57 @@ namespace WpfApp1
             string descrTF2 = "Respawn Entertainment gives you the most advanced titan technology in its new, single player campaign & multiplayer experience. Combine & conquer with new titans & pilots, deadlier weapons, & customization and progression systems that help you and your titan flow as one unstoppable killing force.";
             string descrMGR = "Developed by Kojima Productions and PlatinumGames, METAL GEAR RISING: REVENGEANCE takes the renowned METAL GEAR franchise into exciting new territory with an all-new action experience. The game seamlessly melds pure action and epic story-telling that surrounds Raiden – a child soldier transformed into a half-human, half-cyborg ninja who uses his High Frequency katana blade to cut through any thing that stands in his vengeful path!";
             string descrTOB = "Players embark on a journey of self-discovery as they assume the role of Velvet, a young woman whose once kind demeanor has been replaced and overcome with a festering anger and hatred after a traumatic experience three years prior to the events within Tales of Berseria.";
+            string descrHK = "Hollow Knight is a classically styled 2D action adventure across a vast interconnected world. Explore twisting caverns, ancient cities and deadly wastes; battle tainted creatures and befriend bizarre bugs; and solve ancient mysteries at the kingdom's heart.";
 
-            DBreader.Add_new_game("Elden Ring", "2022/2/25", descrElden);
-            DBreader.Add_new_game("Titanfall 2", "2016/10/28", descrTF2);
-            DBreader.Add_new_game("METAL GEAR RISING: REVENGEANCE", "2014/1/10", descrMGR);
-            DBreader.Add_new_game("Tales of Berseria", "2017/1/27", descrTOB);
 
-            DBreader.Add_new_publisher("Bandai Namco Entertainment");
-            DBreader.Add_new_publisher("Electronic Arts");
-            DBreader.Add_new_publisher("Konami");
+            DBreader.AddNewGame("Elden Ring", DateTime.Parse("2022/2/25"), descrElden);
+            DBreader.AddNewGame("Titanfall 2", DateTime.Parse("2016/10/28"), descrTF2);
+            DBreader.AddNewGame("METAL GEAR RISING: REVENGEANCE", DateTime.Parse("2013/2/19"), descrMGR);
+            DBreader.AddNewGame("Tales of Berseria", DateTime.Parse("2016/8/18"), descrTOB);
+            DBreader.AddNewGame("Hollow Knight", DateTime.Parse("2017/2/25"), descrHK);
 
-            DBreader.Bound_game_publisher(1, 1);
-            DBreader.Bound_game_publisher(2, 2);
-            DBreader.Bound_game_publisher(3, 3);
-            DBreader.Bound_game_publisher(4, 1);
+            DBreader.AddNewPublisher("Bandai Namco Entertainment");
+            DBreader.AddNewPublisher("Electronic Arts");
+            DBreader.AddNewPublisher("Konami");
+            DBreader.AddNewPublisher("Team Cherry");
 
-            DBreader.My_new_game(1, 1);
-            DBreader.My_new_game(2, 1);
-            DBreader.My_new_game(3, 1);
-            DBreader.My_new_game(1, 2);
-            DBreader.My_new_game(4, 2);
+            DBreader.BoundGamePublisher(1, 1);
+            DBreader.BoundGamePublisher(2, 2);
+            DBreader.BoundGamePublisher(3, 3);
+            DBreader.BoundGamePublisher(4, 1);
+            DBreader.BoundGamePublisher(5, 4);
 
+            DBreader.MyNewGame(1, profile_id: 1, 4500, @"E:\games\ELDEN RING\Game\eldenring.exe");
+            DBreader.MyNewGame(2, profile_id: 1, 30000);
+            DBreader.MyNewGame(3, profile_id: 1, 660);
+            DBreader.MyNewGame(5, profile_id: 1, 0, @"E:\games\Hollow Knight\Hollow Knight.exe");
+
+            DBreader.MyNewGame(1, 2, 5);
+            DBreader.MyNewGame(4, 2, 3660);
+
+            DBreader.UpdateMyGame(game_id: 5, profile_id: 1, minuts_in_game: 4500);
         }
 
         public MainWindow()
         {
             InitializeComponent();
-            recreate();
-            //Forms.playground pg = new();
-            //pg.Show();
+            //recreate();
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)
         {
-            string nick = NickTextBox.Text;
-            string passw = PasswTextBox.Text;
+            string nick = _nickTextBox;
+            string passw = _passwTextBox;
 
             bool result = DBreader.LogIn(nick, passw);
 
             if (result)
             {
                 var p = DBreader.Get_profile(nick);
-                Forms.MainForm new_form = new(p, this); 
-                //this.Hide();
+                Forms.MainForm new_form = new(p, this);
+                this.Hide();
                 new_form.ShowDialog();
-                Close();
+                Reset();
             }
             else
                 MessageBox.Show("login fail");
@@ -76,8 +92,8 @@ namespace WpfApp1
 
         private void SignIn_Click(object sender, RoutedEventArgs e)
         {
-            string nick = NickTextBox.Text;
-            string passw = PasswTextBox.Text;
+            string nick = _nickTextBox;
+            string passw = _passwTextBox;
 
             bool result = DBreader.SignIn(nick, passw);
 
@@ -85,8 +101,9 @@ namespace WpfApp1
             {
                 var p = DBreader.Get_profile(nick);
                 Forms.MainForm new_form = new(p, this);
-                new_form.Show();
-                //this.Hide();
+                Hide();
+                new_form.ShowDialog();
+                Reset();
             }
             else
                 MessageBox.Show("SignIn fail");

@@ -22,20 +22,48 @@
               Grid.ColumnSpan="2" Height="18">
             <MenuItem Header="file"></MenuItem>
             <MenuItem Header="games">
-                <MenuItem Click="edit_game_click" Header="edit game info"></MenuItem>
-                <MenuItem Click="edit_publisher_click" Header="edit publisher info"></MenuItem>
+                <MenuItem Header="edit game info"></MenuItem>
+                <MenuItem Header="edit publisher info"></MenuItem>
             </MenuItem>
         </Menu>
 
         <DockPanel Grid.Row="1" Margin="3" Grid.Column="0" Grid.RowSpan="2">
-            <RadioButton Content="Only my games" Margin="3" DockPanel.Dock="Top"
-                         Click="ToggleMyGamesList_Click"/>
-            <ListBox Name="MyGamesList" DockPanel.Dock="Top"/>
+            <CheckBox Content="Only my games" Margin="3" DockPanel.Dock="Top" IsChecked="True"
+                         Checked="ShowMyGames" Unchecked="ShowAllGames"/>
+            <ListBox Name="myGamesList" DockPanel.Dock="Top"/>
         </DockPanel>
 
         <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
-            <Label Name="labelGameTitle" Content="Game-title" DockPanel.Dock="Top"/>
+
+            <Grid DockPanel.Dock="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition MinWidth="60" Width="auto"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
+                       Name="labelGameTitle" Margin="3" Content="Game-title" DockPanel.Dock="Top"/>
+                <Label Grid.Column="0" Grid.Row="1"
+                       Content="Time in game:" Margin="3"/>
+                <Label Grid.Column="1" Grid.Row="1"
+                       Content="00:00" Margin="3" HorizontalContentAlignment="Right"
+                       Name="timeInGameLabel"/>
+                <Button Grid.Column="2" Grid.Row="1"
+                        Height="20" Width="50" Name="PlayButton" ToolTip="Hi"
+                        Content="Play" Margin="3" IsEnabled="False">
+                </Button>
+                <Button Content="Edit" Height="20" Width="50"
+                        Click="EditGameClick"
+                        Grid.Column="5" Grid.Row="1" HorizontalAlignment="Left"/>
+            </Grid>
+            
             <TextBlock Name="textDescription" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="3"/>
+
         </DockPanel>
 
     </Grid>

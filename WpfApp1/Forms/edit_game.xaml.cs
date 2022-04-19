@@ -11,17 +11,37 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfApp1.DBcore;
 
 namespace WpfApp1.Forms
 {
     /// <summary>
     /// Логика взаимодействия для new_game.xaml
     /// </summary>
-    public partial class Edit_game_form : Window
+    public partial class EditGameForm : Window
     {
-        public Edit_game_form()
+        Game selectedGame;
+        GameInfo selectedGameInfo;
+        public EditGameForm(int _game, int _profile)
         {
             InitializeComponent();
+            FillGames();
+        }
+
+        private void FillGames() 
+        {
+            List<Game> games = DBreader.Get_games();
+            List<ListBoxItem> listBoxItems = new();
+
+            foreach (var g in games)
+            {
+                ListBoxItem li = new();
+                li.Content = g.Title;
+                li.DataContext = g.ID;
+                //li.Selected += LiSelected;
+                listBoxItems.Add(li);
+            };
+            GameComboBox.ItemsSource = listBoxItems;
         }
     }
 }

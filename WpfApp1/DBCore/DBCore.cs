@@ -29,7 +29,7 @@ namespace WpfApp1.DBcore
 
         public string? Title { get; set; }
         public string? Relese_date { get; set; }
-        public int? ID { get; set; }
+        public int ID { get; set; }
         public List<Publisher>? Publishers { get; set; }
         public string? Descriptions { get; set; }
     }
@@ -57,14 +57,14 @@ namespace WpfApp1.DBcore
         public const string _status = "status";
         public const string _executable_file = "executable_file";
         public const string _save_file = "save_file";
-        public const string _time_in_game = "time_in_game";
+        public const string _minuts_in_game = "minuts_in_game";
 
-        public int? game_id { get; set; }
-        public string? game_title { get; set; }
-        public int? profile_id { get; set; }
+        public int game_id { get; set; }
+        public string game_title { get; set; }
+        public int profile_id { get; set; }
         public string? executable_file { get; set; }
         public string? save_file { get; set; }
-        public int? time_in_game { get; set; }
+        public ulong time_in_game { get; set; }
     }
 
 
@@ -102,7 +102,7 @@ namespace WpfApp1.DBcore
 											{GameInfo._profile_id} INTEGER,
 											{GameInfo._executable_file} TEXT,
 											{GameInfo._save_file} TEXT, 
-											{GameInfo._time_in_game} INTEGER NOT NULL,
+											{GameInfo._minuts_in_game} INTEGER NOT NULL,
 											
                                             FOREIGN KEY ({GameInfo._profile_id}) 
                                             REFERENCES {Profile._profiles}({Profile._id})
@@ -141,7 +141,7 @@ namespace WpfApp1.DBcore
             }
         }
 
-        #region Profile
+#region Profile
         static public bool LogIn(string nick, string passw)
         {
             if (nick == "")
@@ -240,146 +240,6 @@ namespace WpfApp1.DBcore
             return true;
         }
         static public void SignOut() { connectedNick = ""; }
-        #endregion
-
-        #region Set Data
-        static private bool Check_publisher_by_name(string name)
-        {
-            string expression = $"SELECT COUNT({Publisher._name}) FROM {Publisher._publisher} WHERE {Publisher._name}=@name";
-            object? profile_exist;
-
-            using (var connection = new SqliteConnection(connectStr))
-            {
-                connection.Open();
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = expression
-                };
-
-                SqliteParameter paramNick = new("@name", name);
-                command.Parameters.Add(paramNick);
-
-                profile_exist = command.ExecuteScalar();
-            }
-
-            if (Convert.ToInt32(profile_exist) == 0)
-                return false;
-            return true;
-        }
-        static public bool Add_new_publisher(string name)
-        {
-            if (Check_publisher_by_name(name))
-#if DEBUG
-                throw new Exception($"This name [{name}] is already used");
-#else
-                return false;
-#endif
-
-            string new_publisher_expression = $"INSERT INTO {Publisher._publisher} ({Publisher._name}) VALUES (@name)";
-
-            using (var connection = new SqliteConnection(connectStr))
-            {
-                connection.Open();
-
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = new_publisher_expression
-                };
-
-                SqliteParameter paramNick = new("@name", name);
-                command.Parameters.Add(paramNick);
-
-                command.ExecuteNonQuery();
-            }
-            return true;
-        }
-        static public bool Add_new_game(string title, string date_MM_DD_GGGG, string descr="")
-        {
-            string new_game_expression = $"INSERT INTO {Game._games} " +
-                $"({Game._title}, {Game._relese_date}, {Game._descr}) " +
-                $"VALUES (@title, @release_date, @descr);";
-
-            using (var connection = new SqliteConnection(connectStr))
-            {
-                connection.Open();
-
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = new_game_expression
-                };
-
-                SqliteParameter paramNick = new("@title", title);
-                SqliteParameter paramHash = new("@release_date", date_MM_DD_GGGG);
-                SqliteParameter paramDescr = new("@descr", descr);
-                command.Parameters.Add(paramNick);
-                command.Parameters.Add(paramHash);
-                command.Parameters.Add(paramDescr);
-
-                command.ExecuteNonQuery();
-            }
-            return true;
-        }
-        static public bool Bound_game_publisher(int game_id, int publisher_id)
-        {
-            string new_game_expression = $"INSERT INTO {GamePublisher._game_publisher} " +
-                $"({GamePublisher._game_id}, {GamePublisher._publisher_id}) " +
-                $"VALUES (@game_id, @publisher_id)";
-
-            using (var connection = new SqliteConnection(connectStr))
-            {
-                connection.Open();
-
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = new_game_expression
-                };
-
-                SqliteParameter paramNick = new("@game_id", game_id);
-                SqliteParameter paramHash = new("@publisher_id", publisher_id);
-                command.Parameters.Add(paramNick);
-                command.Parameters.Add(paramHash);
-
-                command.ExecuteNonQuery();
-            }
-            return true;
-        }
-#endregion
-
-#region set profile game
-
-        static public void My_new_game(int game_id, int profile_id) 
-        {
-
-            string new_game_expression = $"INSERT INTO {GameInfo._game_infos} " +
-                $"({GameInfo._game_id}, {GameInfo._profile_id}, {GameInfo._time_in_game}) " +
-                $"VALUES (@game_id, @profile_id, 0)";
-
-            using (var connection = new SqliteConnection(connectStr))
-            {
-                connection.Open();
-
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = new_game_expression
-                };
-
-                SqliteParameter paramNick = new("@game_id", game_id);
-                SqliteParameter paramHash = new("@profile_id", profile_id);
-                command.Parameters.Add(paramNick);
-                command.Parameters.Add(paramHash);
-
-                command.ExecuteNonQuery();
-            }
-        }
-
-#endregion
-
-#region Get Data
         static public Profile Get_profile(string nick) 
         {
             string expression = $"SELECT {Profile._id} FROM {Profile._profiles} " +
@@ -413,9 +273,127 @@ namespace WpfApp1.DBcore
 
             return profile;
         }
+#endregion
+
+#region Set Data
+        static public bool AddNewPublisher(string name)
+        {
+            if (Check_publisher_by_name(name))
+#if DEBUG
+                throw new Exception($"This name [{name}] is already used");
+#else
+                return false;
+#endif
+
+            string new_publisher_expression = $"INSERT INTO {Publisher._publisher} ({Publisher._name}) VALUES (@name)";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = new_publisher_expression
+                };
+
+                SqliteParameter paramNick = new("@name", name);
+                command.Parameters.Add(paramNick);
+
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+        static public bool AddNewGame(string title, DateTime date_MM_DD_GGGG, string descr="")
+        {
+            string new_game_expression = $"INSERT INTO {Game._games} " +
+                $"({Game._title}, {Game._relese_date}, {Game._descr}) " +
+                $"VALUES (@title, @release_date, @descr);";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = new_game_expression
+                };
+
+                SqliteParameter paramNick = new("@title", title);
+                SqliteParameter paramHash = new("@release_date", date_MM_DD_GGGG.ToString(@"yyyy/MM/dd"));
+                SqliteParameter paramDescr = new("@descr", descr);
+                command.Parameters.Add(paramNick);
+                command.Parameters.Add(paramHash);
+                command.Parameters.Add(paramDescr);
+
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+        static public bool BoundGamePublisher(int game_id, int publisher_id)
+        {
+            string new_game_expression = $"INSERT INTO {GamePublisher._game_publisher} " +
+                $"({GamePublisher._game_id}, {GamePublisher._publisher_id}) " +
+                $"VALUES (@game_id, @publisher_id)";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = new_game_expression
+                };
+
+                SqliteParameter paramNick = new("@game_id", game_id);
+                SqliteParameter paramHash = new("@publisher_id", publisher_id);
+                command.Parameters.Add(paramNick);
+                command.Parameters.Add(paramHash);
+
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+        static public void MyNewGame(int game_id, int profile_id, ulong minuts_in_game=0, string path_to_exe="") 
+        {
+
+            string new_game_expression = $"INSERT INTO {GameInfo._game_infos} " +
+                $"({GameInfo._game_id}, {GameInfo._profile_id}, {GameInfo._minuts_in_game}, {GameInfo._executable_file}) " +
+                $"VALUES (@game_id, @profile_id, @minuts_in_game, @_executable_file)";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = new_game_expression
+                };
+
+                SqliteParameter paramNick = new("@game_id", game_id);
+                SqliteParameter paramHash = new("@profile_id", profile_id);
+                SqliteParameter paramTime = new("@minuts_in_game", minuts_in_game);
+                SqliteParameter paramExe = new("@_executable_file", path_to_exe);
+                command.Parameters.Add(paramNick);
+                command.Parameters.Add(paramHash);
+                command.Parameters.Add(paramTime);
+                command.Parameters.Add(paramExe);
+
+                command.ExecuteNonQuery();
+            }
+        }
+#endregion
+
+
+#region Get Data
+
+        #region Game
         static public List<Game> Get_games()
         {
-            string expression = $"SELECT {Game._id}, {Game._title} FROM {Game._games}";
+            string expression = $"SELECT * FROM {Game._games}";
             SqliteDataReader gamesReader;
             List<Game> games = new();
 
@@ -437,6 +415,7 @@ namespace WpfApp1.DBcore
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
                         Descriptions = gamesReader[Game._descr].ToString(),
+                        Relese_date = gamesReader[Game._relese_date].ToString(),
                     };
 
                     games.Add(gm);
@@ -447,7 +426,7 @@ namespace WpfApp1.DBcore
             {
                 Game gm = games[i];
 
-                List<Publisher> publishers = Get_publishers_by_game_id(games[i].ID.Value);
+                List<Publisher> publishers = Get_publishers_by_game_id(games[i].ID);
                 gm.Publishers = publishers;
 
                 games[i] = gm;
@@ -482,14 +461,42 @@ namespace WpfApp1.DBcore
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
                         Descriptions = gamesReader[Game._descr].ToString(),
+                        Relese_date = gamesReader[Game._relese_date].ToString(),
                     };
                 }
             }
 
-            List<Publisher> publishers = Get_publishers_by_game_id(game.ID.Value);
+            List<Publisher> publishers = Get_publishers_by_game_id(game.ID);
             game.Publishers = publishers;
 
             return game;
+        }
+        #endregion
+        
+        #region Publishers
+        static private bool Check_publisher_by_name(string name)
+        {
+            string expression = $"SELECT COUNT({Publisher._name}) FROM {Publisher._publisher} WHERE {Publisher._name}=@name";
+            object? profile_exist;
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                SqliteParameter paramNick = new("@name", name);
+                command.Parameters.Add(paramNick);
+
+                profile_exist = command.ExecuteScalar();
+            }
+
+            if (Convert.ToInt32(profile_exist) == 0)
+                return false;
+            return true;
         }
         static public Publisher Get_publisher_by_id(int id)
         {
@@ -564,6 +571,8 @@ namespace WpfApp1.DBcore
             }
             return publishers;
         }
+        #endregion
+
         static public List<GameInfo> Get_my_games_info(int profile_id)
         {
             string expression = $"SELECT * FROM {GameInfo._game_infos} " +
@@ -592,18 +601,115 @@ namespace WpfApp1.DBcore
                     {
                         game_id = Convert.ToInt32( gamesReader[GameInfo._game_id]),
                         profile_id = Convert.ToInt32(gamesReader[GameInfo._profile_id]),
-                        time_in_game = Convert.ToInt32(gamesReader[GameInfo._time_in_game]),
+                        time_in_game = Convert.ToUInt64(gamesReader[GameInfo._minuts_in_game]),
                         executable_file = gamesReader[GameInfo._executable_file].ToString(),
                         save_file = gamesReader[GameInfo._save_file].ToString(),
                     };
-                    gi.game_title = Get_Game(gi.game_id.Value).Title;
+                    gi.game_title = Get_Game(gi.game_id).Title ?? "-";
                     games.Add(gi);
                 }
             }
 
             return games;
         }
+        #endregion
 
-#endregion
+        #region UpdateData
+        static public void UpdateGame(int game_id, string title="", string descr="", DateTime? release_date=null) 
+        {
+            string expression = $"UPDATE {Game._games} ";
+
+            Stack<string> exprParams = new();
+            Stack<SqliteParameter> cmdParams = new();
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                if (title != "")
+                {
+                    cmdParams.Push(new SqliteParameter("@title", title));
+                    exprParams.Push($"{Game._title}=@title");
+                }
+                if (descr != "")
+                {
+                    cmdParams.Push(new SqliteParameter("@descr", descr));
+                    exprParams.Push($"{Game._descr}=@descr");
+                }
+                if (release_date != null)
+                {
+                    cmdParams.Push(new SqliteParameter("@release_date", release_date?.ToString(@"yyyy/MM/dd")));
+                    exprParams.Push($"{Game._relese_date}=@release_date");
+                }
+
+                if (exprParams.Count == 0) return;
+                
+                expression += $"SET {exprParams.Pop()}";
+                while(exprParams.Count > 0)
+                    expression += $", {exprParams.Pop()}";
+                expression += $" WHERE {Game._id}=@id";
+
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                while (cmdParams.Count > 0)
+                    command.Parameters.Add(cmdParams.Pop());
+                command.Parameters.Add(new SqliteParameter("@id", game_id));
+
+                command.ExecuteNonQuery();
+
+            }
+        }
+        static public void UpdateMyGame(int game_id, int profile_id, string? path_to_exe=null, string? path_to_save=null, ulong? minuts_in_game=null) 
+        {
+            string expression = $"UPDATE {GameInfo._game_infos} ";
+
+            Stack<string> exprParams = new();
+            Stack<SqliteParameter> cmdParams = new();
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                if (path_to_exe != null)
+                {
+                    cmdParams.Push(new SqliteParameter("@path_to_exe", path_to_exe));
+                    exprParams.Push($"{GameInfo._executable_file}=@path_to_exe");
+                }
+                if (path_to_save != null)
+                {
+                    cmdParams.Push(new SqliteParameter("@path_to_save", path_to_save));
+                    exprParams.Push($"{GameInfo._save_file}=@path_to_save");
+                }
+                if (minuts_in_game != null)
+                {
+                    cmdParams.Push(new SqliteParameter("@minuts_in_game", minuts_in_game));
+                    exprParams.Push($"{GameInfo._minuts_in_game}=@minuts_in_game");
+                }
+
+                if (exprParams.Count == 0) return;
+                
+                expression += $"SET {exprParams.Pop()}";
+                while(exprParams.Count > 0)
+                    expression += $", {exprParams.Pop()}";
+                expression += $" WHERE {GameInfo._profile_id}=@profile_id AND {GameInfo._game_id}=@game_id";
+
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                while (cmdParams.Count > 0)
+                    command.Parameters.Add(cmdParams.Pop());
+                command.Parameters.Add(new SqliteParameter("@game_id", game_id));
+                command.Parameters.Add(new SqliteParameter("@profile_id", profile_id));
+
+                command.ExecuteNonQuery();
+
+            }
+        }
+        #endregion
     }
 }
