@@ -30,6 +30,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 
                 <Label Content="Game: " 
@@ -41,8 +42,7 @@
                 <Label Content="Game title:" 
                        Grid.Column="0" Grid.Row="1"
                        Margin="3" VerticalAlignment="Center"/>
-                <TextBox Text="asd" 
-                         Grid.Row="1" Grid.Column="1" 
+                <TextBox Grid.Row="1" Grid.Column="1" 
                          Margin="3" VerticalAlignment="Center"/>
                 
                 <Label Content="Release Date:" 
@@ -51,12 +51,16 @@
                 <DatePicker Margin="3"
                     Grid.Column="1" Grid.Row="2"/>
                 
-                <Label Content="Description:" 
+                <Label Content="Description:"  
                        Grid.Column="0" Grid.Row="3"
-                       Margin="3" VerticalAlignment="Center"/>
+                       Margin="3" VerticalAlignment="Top"/>
                 <TextBox Margin="3" TextWrapping="Wrap"
                        Grid.Column="1" Grid.Row="3"/>
-
+                <Label Content="Publishers:"  
+                       Grid.Column="0" Grid.Row="4"
+                       Margin="3" VerticalAlignment="Top"/>
+                <Label Content="empty"
+                       Grid.Column="1" Grid.Row="4"/>
             </Grid>
             
             <Grid Grid.Column="1">
