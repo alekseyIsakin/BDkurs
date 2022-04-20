@@ -25,10 +25,15 @@ namespace WpfApp1.Forms
         public EditGameForm(int _game, int _profile)
         {
             InitializeComponent();
-            FillGames();
+            FillGameList();
         }
 
-        private void FillGames() 
+        private void SetupControlGameData(Game gm) 
+        {
+        
+        }
+
+        private void FillGameList() 
         {
             List<Game> games = DBreader.Get_games();
             List<ListBoxItem> listBoxItems = new();

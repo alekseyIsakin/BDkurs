@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Forms\Controls\publisherSetter - Копировать.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>publisherSetter.xaml.cs</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

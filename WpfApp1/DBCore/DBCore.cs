@@ -498,6 +498,75 @@ namespace WpfApp1.DBcore
                 return false;
             return true;
         }
+        static public List<Publisher> Get_publishers()
+        {
+            string expression = $"SELECT * " +
+                $"FROM {Publisher._publisher} ";
+
+            SqliteDataReader gamesReader;
+            List<Publisher> publishers = new();
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadOnly;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                gamesReader = command.ExecuteReader();
+
+                while (gamesReader.Read())
+                {
+                    Publisher publ = new ()
+                    {
+                        ID = Convert.ToInt32(gamesReader[Publisher._id]),
+                        Name = gamesReader[Publisher._name].ToString(),
+                    };
+                    publishers.Add(publ);
+                }
+            }
+
+            return publishers;
+        }
+        static public List<Publisher> Get_publishers_by_game_id(int game_id)
+        {
+            string expression = $"SELECT {GamePublisher._publisher_id} " +
+                $"FROM {GamePublisher._game_publisher} " +
+                $"WHERE {GamePublisher._game_id}=@game_id";
+
+            List<int> publishers_id = new();
+            List<Publisher> publishers = new();
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadOnly;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                SqliteParameter param = new("@game_id", game_id);
+                command.Parameters.Add(param);
+
+                SqliteDataReader gamesReader = command.ExecuteReader();
+
+                while (gamesReader.Read())
+                {
+                    publishers_id.Add(
+                        Convert.ToInt32(gamesReader[GamePublisher._publisher_id])
+                    );
+                }
+            }
+            foreach (var id in publishers_id)
+            {
+                var publ = Get_publisher_by_id(id);
+                publishers.Add(publ);
+            }
+            return publishers;
+        }
         static public Publisher Get_publisher_by_id(int id)
         {
             string expression = $"SELECT * " +
@@ -532,44 +601,6 @@ namespace WpfApp1.DBcore
             }
 
             return publisher;
-        }
-        static public List<Publisher> Get_publishers_by_game_id(int game_id)
-        {
-            string expression = $"SELECT {GamePublisher._publisher_id} " +
-                $"FROM {GamePublisher._game_publisher} " +
-                $"WHERE {GamePublisher._game_id} = @game_id";
-
-            SqliteDataReader gamesReader;
-            List<int> publishers_id = new();
-            List<Publisher> publishers = new();
-
-            using (var connection = new SqliteConnection(connectStr + "Mode=ReadOnly;"))
-            {
-                connection.Open();
-                SqliteCommand command = new()
-                {
-                    Connection = connection,
-                    CommandText = expression
-                };
-
-                SqliteParameter param = new("@game_id", game_id);
-                command.Parameters.Add(param);
-
-                gamesReader = command.ExecuteReader();
-
-                while (gamesReader.Read())
-                {
-                    publishers_id.Add(
-                        Convert.ToInt32(gamesReader[GamePublisher._publisher_id])
-                    );
-                }
-            }
-            foreach (var id in publishers_id)
-            {
-                var publ = Get_publisher_by_id(id);
-                publishers.Add(publ);
-            }
-            return publishers;
         }
         #endregion
 
