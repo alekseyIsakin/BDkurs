@@ -11,8 +11,8 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="60"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="PublisherName" Content="{Binding publisher.ID}"
+        <Label x:Name="PublisherName" Content="{Binding publisher.Name}"
                Grid.Column="0" Margin="3" VerticalContentAlignment="Center"/>
-        <Button Content="Del" Grid.Column="1" Margin="3"/>
+        <Button Content="Del" Grid.Column="1" Margin="3" Click="Button_Click"/>
     </Grid>
 </UserControl>

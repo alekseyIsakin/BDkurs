@@ -6,71 +6,77 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1.Forms"
         mc:Ignorable="d"
-        Title="new_game" Height="450" Width="800">
-    <StackPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-        </Grid>
-        <Grid>
+        Name="EditGameWindow"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        Title="new_game" MinHeight="400" MaxHeight="400" Width="800">
+    <DockPanel>
+        <Grid VerticalAlignment="Stretch" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                
-                <Label Content="Game: " 
+            <ScrollViewer VerticalScrollBarVisibility="Visible" >
+                <Grid Grid.Column="0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Label Content="Game: " 
                        Grid.Column="0" Grid.Row="0"
                        VerticalAlignment="Center" Margin="3"/>
-                <ComboBox Name="GameComboBox" Grid.Column="1" Grid.Row="0"
+                    <ComboBox Name="GameComboBox" Grid.Column="1" Grid.Row="0"
                           VerticalAlignment="Center" Margin="3"/>
 
-                <Label Content="Game title:" 
+                    <Label Content="Game title:" 
                        Grid.Column="0" Grid.Row="1"
                        Margin="3" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="1" Grid.Column="1" 
+                    <TextBox Name="GameTitleTextBox" Grid.Row="1" Grid.Column="1"
+                             TextChanged="GameTitleTextBox_TextChanged"
                          Margin="3" VerticalAlignment="Center"/>
-                
-                <Label Content="Release Date:" 
+
+                    <Label Content="Release Date:" 
                        Grid.Column="0" Grid.Row="2"
                        Margin="3" VerticalAlignment="Center"/>
-                <DatePicker Margin="3"
-                    Grid.Column="1" Grid.Row="2"/>
-                
-                <Label Content="Publishers:"  
-                       Grid.Column="0" Grid.Row="3"
-                       Margin="3" VerticalAlignment="Top"/>
-                <StackPanel Name="PublishersPanel" Grid.Column="1" Grid.Row="3">
-                    <uc:PublisherCmb PublisherCmbSelected="PublisherCmbSelected"/>
-                </StackPanel>
+                    <DatePicker Name="ReleaseDatePicker" Margin="3"
+                                SelectedDateChanged="ReleaseDatePicker_SelectedDateChanged"
+                        Grid.Column="1" Grid.Row="2"/>
+                    <Label Content="Publishers:"  
+                        Grid.Column="0" Grid.Row="3"
+                        Margin="3" VerticalAlignment="Top"/>
+
+                    <StackPanel Grid.Column="1" Grid.Row="3">
+                        <uc:PublisherCmb PublisherCmbSelected="AddPublisherClick"/>
+                        <Separator Margin="2"/>
+                        <StackPanel Name="PublishersPanel" >
+                        </StackPanel>
+                    </StackPanel>
 
 
-                <Label Content="Description:"  
+                    <Label Content="Description:"  
                        Grid.Column="0" Grid.Row="4"
                        Margin="3" VerticalAlignment="Top"/>
-                <TextBox Margin="3" TextWrapping="Wrap"
+                    <TextBox Name="DescriptionTexBlock" Margin="3" TextWrapping="Wrap"
+                             TextChanged="DescriptionTexBlock_TextChanged"
                        Grid.Column="1" Grid.Row="4"/>
-                
-            </Grid>
-            
+                    <Button Content="Accept" Click="AcceptButton_Click"
+                             Grid.Row="5" Margin="3"/>
+                </Grid>
+            </ScrollViewer>
+
             <Grid Grid.Column="1">
 
             </Grid>
         </Grid>
-    </StackPanel>
+    </DockPanel>
 </Window>

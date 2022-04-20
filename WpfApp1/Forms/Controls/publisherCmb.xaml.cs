@@ -51,7 +51,7 @@ namespace WpfApp1.Forms.Controls
 
         private void PublisherCmb_Selected(object sender, RoutedEventArgs e)
         {
-            Publisher publ = (Publisher)(sender as ComboBox).SelectedItem;
+            Publisher publ = (Publisher)publisherCmb.SelectedItem;
             PublisherCmbEventArgs arg = new(publ);
 
             PublisherCmbSelected?.Invoke(this, arg);

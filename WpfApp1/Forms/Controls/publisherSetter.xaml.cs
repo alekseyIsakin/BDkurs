@@ -22,10 +22,16 @@ namespace WpfApp1.Forms.Controls
     public partial class publisherSetter : UserControl
     {
         public Publisher publisher { get; set; } = new();
+        public event EventHandler DelClick;
         public publisherSetter()
         {
             InitializeComponent();
             this.DataContext = this;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            DelClick?.Invoke(this, new());
         }
     }
 }

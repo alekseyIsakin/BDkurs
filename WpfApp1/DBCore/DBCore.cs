@@ -26,20 +26,36 @@ namespace WpfApp1.DBcore
         public const string _id = "id";
         public const string _relese_date = "release_date";
         public const string _descr = "description";
-
+        public static Game EMPTY => new() { ID = -1, Descriptions = "", Publishers = new(), Relese_date = DateTime.Parse("1970/1/1"), Title = "new game" };
         public string? Title { get; set; }
-        public string? Relese_date { get; set; }
+        public DateTime Relese_date { get; set; }
         public int ID { get; set; }
-        public List<Publisher>? Publishers { get; set; }
+        public List<Publisher> Publishers { get; set; }
         public string? Descriptions { get; set; }
+        public static bool operator ==(Game p1, Game p2)
+        {
+            return p1.ID == p2.ID;
+        }
+        public static bool operator !=(Game p1, Game p2)
+        {
+            return p1.ID != p2.ID;
+        }
     }
     public struct Publisher
     {
         public const string _publisher = "publishers";
         public const string _id = "id";
         public const string _name = "name";
-        public int? ID { get; set; }
+        public int ID { get; set; }
         public string Name { get; set; }
+        public static bool operator ==(Publisher p1, Publisher p2) 
+        {
+            return p1.ID == p2.ID;
+        }
+        public static bool operator !=(Publisher p1, Publisher p2)
+        {
+            return p1.ID != p2.ID;
+        }
     }
     public struct GamePublisher
     {
@@ -65,6 +81,14 @@ namespace WpfApp1.DBcore
         public string? executable_file { get; set; }
         public string? save_file { get; set; }
         public ulong time_in_game { get; set; }
+        public static bool operator ==(GameInfo p1, GameInfo p2)
+        {
+            return p1.game_id == p2.game_id && p1.profile_id == p2.profile_id;
+        }
+        public static bool operator !=(GameInfo p1, GameInfo p2)
+        {
+            return p1.game_id != p2.game_id || p1.profile_id != p2.profile_id;
+        }
     }
 
 
@@ -104,26 +128,28 @@ namespace WpfApp1.DBcore
 											{GameInfo._save_file} TEXT, 
 											{GameInfo._minuts_in_game} INTEGER NOT NULL,
 											
-                                            FOREIGN KEY ({GameInfo._profile_id}) 
-                                            REFERENCES {Profile._profiles}({Profile._id})
+                                            FOREIGN KEY ({GameInfo._profile_id})
+                                            REFERENCES {Profile._profiles}({Profile._id}),
 											
-                                            FOREIGN KEY ({GameInfo._game_id}) 
-                                            REFERENCES {Game._games}({Game._id}));";
+                                            FOREIGN KEY ({GameInfo._game_id})
+                                            REFERENCES {Game._games} ({Game._id}),
+                                            PRIMARY KEY ({GameInfo._profile_id}, {GameInfo._game_id}));";
 
             string createTablePublishers = @$"CREATE TABLE {Publisher._publisher}(
 											{Publisher._id} INTEGER PRIMARY KEY AUTOINCREMENT, 
                                             {Publisher._name} TEXT UNIQUE);";
 
             string createTableGamePublishers = @$"CREATE TABLE {GamePublisher._game_publisher}(
-											{GamePublisher._game_id}      INTEGER NOT NULL , 
+											{GamePublisher._game_id}      INTEGER NOT NULL, 
                                             {GamePublisher._publisher_id} INTEGER NOT NULL,
                                             {GamePublisher._country} TEXT,
 
                                             FOREIGN KEY ({GamePublisher._game_id})
-                                            REFERENCES {Game._games}({Game._id})
+                                            REFERENCES {Game._games}({Game._id}),
 
                                             FOREIGN KEY ({GamePublisher._publisher_id})
-                                            REFERENCES {Publisher._publisher}({Publisher._id}));";
+                                            REFERENCES {Publisher._publisher}({Publisher._id}),
+                                            PRIMARY KEY ({GamePublisher._game_id}, {GamePublisher._publisher_id}));";
 
             using (SqliteConnection connection = new(createMode))
             {
@@ -132,16 +158,16 @@ namespace WpfApp1.DBcore
                 {
                     Connection = connection,
                     CommandText = createTableProfile +
-                        createTableGames +
-                        createTableGameIfo +
-                        createTablePublishers +
-                        createTableGamePublishers
+                        createTableGames
+                        + createTableGameIfo
+                        + createTablePublishers
+                        + createTableGamePublishers
                 };
                 command.ExecuteNonQuery();
             }
         }
 
-#region Profile
+        #region Profile
         static public bool LogIn(string nick, string passw)
         {
             if (nick == "")
@@ -279,11 +305,7 @@ namespace WpfApp1.DBcore
         static public bool AddNewPublisher(string name)
         {
             if (Check_publisher_by_name(name))
-#if DEBUG
                 throw new Exception($"This name [{name}] is already used");
-#else
-                return false;
-#endif
 
             string new_publisher_expression = $"INSERT INTO {Publisher._publisher} ({Publisher._name}) VALUES (@name)";
 
@@ -303,6 +325,10 @@ namespace WpfApp1.DBcore
                 command.ExecuteNonQuery();
             }
             return true;
+        }
+        static public bool AddNewGame(Game gm) 
+        {
+            return AddNewGame(gm.Title, gm.Relese_date, gm.Descriptions);
         }
         static public bool AddNewGame(string title, DateTime date_MM_DD_GGGG, string descr="")
         {
@@ -331,7 +357,7 @@ namespace WpfApp1.DBcore
             }
             return true;
         }
-        static public bool BoundGamePublisher(int game_id, int publisher_id)
+        static public bool BindGamePublisher(int game_id, int publisher_id)
         {
             string new_game_expression = $"INSERT INTO {GamePublisher._game_publisher} " +
                 $"({GamePublisher._game_id}, {GamePublisher._publisher_id}) " +
@@ -415,7 +441,7 @@ namespace WpfApp1.DBcore
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
                         Descriptions = gamesReader[Game._descr].ToString(),
-                        Relese_date = gamesReader[Game._relese_date].ToString(),
+                        Relese_date = DateTime.Parse(gamesReader[Game._relese_date].ToString()),
                     };
 
                     games.Add(gm);
@@ -437,6 +463,8 @@ namespace WpfApp1.DBcore
         }
         static public Game Get_Game(int game_id) 
         {
+            if (game_id == -1) return Game.EMPTY;
+
             string expression = $"SELECT * FROM {Game._games} WHERE {Game._id}=@game_id";
             SqliteDataReader gamesReader;
             Game game = new();
@@ -461,7 +489,7 @@ namespace WpfApp1.DBcore
                         ID = Convert.ToInt32(gamesReader[Game._id]),
                         Title = gamesReader[Game._title].ToString(),
                         Descriptions = gamesReader[Game._descr].ToString(),
-                        Relese_date = gamesReader[Game._relese_date].ToString(),
+                        Relese_date = DateTime.Parse(gamesReader[Game._relese_date].ToString()),
                     };
                 }
             }
@@ -646,6 +674,16 @@ namespace WpfApp1.DBcore
         #endregion
 
         #region UpdateData
+
+        internal static void UpdateGame(Game gm)
+        {
+            UpdateGame(gm.ID, gm.Title, gm.Descriptions, gm.Relese_date);
+            UnbindPublisherFromGame(gm.ID);
+            foreach (Publisher publ in gm.Publishers) 
+            {
+                BindGamePublisher(gm.ID, publ.ID);
+            }
+        }
         static public void UpdateGame(int game_id, string title="", string descr="", DateTime? release_date=null) 
         {
             string expression = $"UPDATE {Game._games} ";
@@ -739,6 +777,27 @@ namespace WpfApp1.DBcore
 
                 command.ExecuteNonQuery();
 
+            }
+        }
+        #endregion
+
+        #region Remove data
+        public static void UnbindPublisherFromGame(int game_id)
+        {
+            string expression = $"DELETE FROM {GamePublisher._game_publisher} " +
+                $"WHERE {GamePublisher._game_id}=@game_id";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@game_id", game_id));
+                command.ExecuteNonQuery();
             }
         }
         #endregion

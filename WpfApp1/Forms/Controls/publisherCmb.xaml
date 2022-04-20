@@ -13,8 +13,8 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="60"/>
         </Grid.ColumnDefinitions>
-        <ComboBox x:Name="publisherCmb" DisplayMemberPath="Name" SelectionChanged="PublisherCmb_Selected"
+        <ComboBox x:Name="publisherCmb" DisplayMemberPath="Name" 
                Grid.Column="0" Margin="3" VerticalContentAlignment="Center"/>
-        <Button Content="Add" Grid.Column="1" Margin="3"/>
+        <Button Content="Add" Grid.Column="1" Margin="3" Click="PublisherCmb_Selected"/>
     </Grid>
 </UserControl>

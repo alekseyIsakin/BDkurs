@@ -9,7 +9,7 @@ namespace WpfApp1
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : RibbonWindow
+    public partial class MainWindow : Window
     {
         private string _nickTextBox { get => NickTextBox.Text; }
         private string _passwTextBox { get => PasswTextBox.Text; }
@@ -47,11 +47,11 @@ namespace WpfApp1
             DBreader.AddNewPublisher("Konami");
             DBreader.AddNewPublisher("Team Cherry");
 
-            DBreader.BoundGamePublisher(1, 1);
-            DBreader.BoundGamePublisher(2, 2);
-            DBreader.BoundGamePublisher(3, 3);
-            DBreader.BoundGamePublisher(4, 1);
-            DBreader.BoundGamePublisher(5, 4);
+            DBreader.BindGamePublisher(1, 1);
+            DBreader.BindGamePublisher(2, 2);
+            DBreader.BindGamePublisher(3, 3);
+            DBreader.BindGamePublisher(4, 1);
+            DBreader.BindGamePublisher(5, 4);
 
             DBreader.MyNewGame(1, profile_id: 1, 4500, @"E:\games\ELDEN RING\Game\eldenring.exe");
             DBreader.MyNewGame(2, profile_id: 1, 30000);
@@ -67,7 +67,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            //recreate();
+            recreate();
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)
@@ -107,6 +107,17 @@ namespace WpfApp1
             }
             else
                 MessageBox.Show("SignIn fail");
+        }
+
+        private void ExitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void Window_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                this.DragMove();
         }
     }
 }
