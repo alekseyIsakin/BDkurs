@@ -99,7 +99,7 @@ namespace WpfApp1.Forms
 
         private void AddPublisherClick(object sender, EventArgs e)
         {
-            Publisher publ = ((Controls.PublisherCmbEventArgs)e).slectedPublisher;
+            Publisher publ = ((Controls.PublisherEventArgs)e).slectedPublisher;
 
             if (selectedGame.Publishers.Contains(publ))
                 return;

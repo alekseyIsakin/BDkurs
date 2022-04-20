@@ -19,14 +19,7 @@ namespace WpfApp1.Forms.Controls
     /// <summary>
     /// Логика взаимодействия для publisherCmb.xaml
     /// </summary>
-    public class PublisherCmbEventArgs : EventArgs 
-    {
-        public PublisherCmbEventArgs(Publisher _publ) 
-        {
-            slectedPublisher = _publ;
-        }
-        public Publisher slectedPublisher { get; }
-    }
+
     public partial class PublisherCmb : UserControl
     {
         public List<Publisher> publishers;
@@ -52,7 +45,7 @@ namespace WpfApp1.Forms.Controls
         private void PublisherCmb_Selected(object sender, RoutedEventArgs e)
         {
             Publisher publ = (Publisher)publisherCmb.SelectedItem;
-            PublisherCmbEventArgs arg = new(publ);
+            PublisherEventArgs arg = new(publ);
 
             PublisherCmbSelected?.Invoke(this, arg);
         }
