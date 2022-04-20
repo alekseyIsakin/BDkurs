@@ -22,6 +22,10 @@ namespace WpfApp1.Forms
     {
         Game selectedGame;
         GameInfo selectedGameInfo;
+        public EditGameForm() 
+        {
+            InitializeComponent();
+        }
         public EditGameForm(int _game, int _profile)
         {
             InitializeComponent();
@@ -47,6 +51,14 @@ namespace WpfApp1.Forms
                 listBoxItems.Add(li);
             };
             GameComboBox.ItemsSource = listBoxItems;
+        }
+
+        private void PublisherCmbSelected(object sender, EventArgs e)
+        {
+            Publisher publ = (e as Controls.PublisherCmbEventArgs).slectedPublisher;
+            Control publControl = new Controls.publisherSetter() {publisher=publ };
+
+            PublishersPanel.Children.Add(publControl);
         }
     }
 }

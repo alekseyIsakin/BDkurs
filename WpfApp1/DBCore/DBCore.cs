@@ -39,7 +39,7 @@ namespace WpfApp1.DBcore
         public const string _id = "id";
         public const string _name = "name";
         public int? ID { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; }
     }
     public struct GamePublisher
     {

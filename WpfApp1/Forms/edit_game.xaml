@@ -55,9 +55,8 @@
                 <Label Content="Publishers:"  
                        Grid.Column="0" Grid.Row="3"
                        Margin="3" VerticalAlignment="Top"/>
-                <StackPanel Grid.Column="1" Grid.Row="3">
-                    <Button Content="Add"/>
-                    <!--<uc:publisherSetter Title="sad"/>-->
+                <StackPanel Name="PublishersPanel" Grid.Column="1" Grid.Row="3">
+                    <uc:PublisherCmb PublisherCmbSelected="PublisherCmbSelected"/>
                 </StackPanel>
 
 

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfApp1.DBcore;
 
 namespace WpfApp1.Forms.Controls
 {
@@ -20,7 +21,7 @@ namespace WpfApp1.Forms.Controls
     /// </summary>
     public partial class publisherSetter : UserControl
     {
-        public string Title { get; set; } = "";
+        public Publisher publisher { get; set; } = new();
         public publisherSetter()
         {
             InitializeComponent();
