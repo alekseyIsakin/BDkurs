@@ -74,6 +74,7 @@ namespace WpfApp1.DBcore
         public const string _executable_file = "executable_file";
         public const string _save_file = "save_file";
         public const string _minuts_in_game = "minuts_in_game";
+        public static GameInfo EMPTY => new() { game_id = -1, profile_id = -1, save_file = "", executable_file = "", game_title = "", time_in_game = 0 };
 
         public int game_id { get; set; }
         public string game_title { get; set; }
@@ -382,12 +383,16 @@ namespace WpfApp1.DBcore
             }
             return true;
         }
-        static public void MyNewGame(int game_id, int profile_id, ulong minuts_in_game=0, string path_to_exe="") 
+        static public void SetupNewGame(GameInfo gi) 
+        {
+            MyNewGame(gi.game_id, gi.profile_id, gi.time_in_game, gi.executable_file, gi.save_file);
+        }
+        static public void MyNewGame(int game_id, int profile_id, ulong minuts_in_game = 0, string path_to_exe = "", string save_file = "")
         {
 
             string new_game_expression = $"INSERT INTO {GameInfo._game_infos} " +
-                $"({GameInfo._game_id}, {GameInfo._profile_id}, {GameInfo._minuts_in_game}, {GameInfo._executable_file}) " +
-                $"VALUES (@game_id, @profile_id, @minuts_in_game, @_executable_file)";
+                $"({GameInfo._game_id}, {GameInfo._profile_id}, {GameInfo._minuts_in_game}, {GameInfo._executable_file}, {GameInfo._save_file}) " +
+                $"VALUES (@game_id, @profile_id, @minuts_in_game, @executable_file, @save_file)";
 
             using (var connection = new SqliteConnection(connectStr))
             {
@@ -399,22 +404,22 @@ namespace WpfApp1.DBcore
                     CommandText = new_game_expression
                 };
 
-                SqliteParameter paramNick = new("@game_id", game_id);
-                SqliteParameter paramHash = new("@profile_id", profile_id);
-                SqliteParameter paramTime = new("@minuts_in_game", minuts_in_game);
-                SqliteParameter paramExe = new("@_executable_file", path_to_exe);
-                command.Parameters.Add(paramNick);
-                command.Parameters.Add(paramHash);
-                command.Parameters.Add(paramTime);
-                command.Parameters.Add(paramExe);
+                Stack<SqliteParameter> parameters = new();
+                parameters.Push(new("@game_id", game_id));
+                parameters.Push(new("@profile_id", profile_id));
+                parameters.Push(new("@minuts_in_game", minuts_in_game));
+                parameters.Push(new("@executable_file", path_to_exe));
+                parameters.Push(new("@save_file", save_file));
 
+                while (parameters.Count > 0)
+                    command.Parameters.Add(parameters.Pop());
                 command.ExecuteNonQuery();
-            }
+            } 
         }
-#endregion
+        #endregion
 
 
-#region Get Data
+        #region Get Data
 
         #region Game
         static public List<Game> Get_games()
@@ -632,10 +637,13 @@ namespace WpfApp1.DBcore
         }
         #endregion
 
-        static public List<GameInfo> Get_my_games_info(int profile_id)
+        static public List<GameInfo> Get_my_games_infos(int profile_id, int game_id=-1)
         {
             string expression = $"SELECT * FROM {GameInfo._game_infos} " +
                 $"WHERE {GameInfo._profile_id}=@profile_id";
+
+            expression += game_id == -1 ? 
+                ";" : $" AND {GameInfo._game_id}=@game_id";
 
             SqliteDataReader gamesReader;
             List<GameInfo> games = new();
@@ -650,6 +658,12 @@ namespace WpfApp1.DBcore
                 };
 
                 SqliteParameter param = new("@profile_id", profile_id);
+                if (game_id != -1) 
+                {
+                    SqliteParameter param_gmid = new("@game_id", game_id); ;
+                    command.Parameters.Add(param_gmid);
+                }
+
                 command.Parameters.Add(param);
 
                 gamesReader = command.ExecuteReader();
@@ -731,6 +745,11 @@ namespace WpfApp1.DBcore
 
             }
         }
+
+        internal static void UpdateMyGame(GameInfo gi)
+        {
+            UpdateMyGame(gi.game_id, gi.profile_id, gi.executable_file, gi.save_file, gi.time_in_game);
+        }
         static public void UpdateMyGame(int game_id, int profile_id, string? path_to_exe=null, string? path_to_save=null, ulong? minuts_in_game=null) 
         {
             string expression = $"UPDATE {GameInfo._game_infos} ";
@@ -799,6 +818,80 @@ namespace WpfApp1.DBcore
                 command.Parameters.Add(new SqliteParameter("@game_id", game_id));
                 command.ExecuteNonQuery();
             }
+        }
+        static public void DeleteMyGame(int profile_id, int game_id) 
+        {
+            string expression = $"DELETE FROM {GameInfo._game_infos} " +
+                    $"WHERE {GameInfo._game_id}=@game_id AND {GameInfo._profile_id}=@profile_id";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@game_id", game_id));
+                command.Parameters.Add(new SqliteParameter("@profile_id", profile_id));
+                command.ExecuteNonQuery();
+            }
+        }
+        static public bool DeleteGame(Game gm)
+        {
+            return DeleteGame(gm.ID);
+        }
+        static public bool DeleteGame(int id)
+        {
+            string expression = $"DELETE FROM {GameInfo._game_infos} " +
+                $"WHERE {GameInfo._game_id}=@game_id";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@game_id", id));
+                command.ExecuteNonQuery();
+            }
+
+            expression = $"DELETE FROM {GamePublisher._game_publisher} " +
+                $"WHERE {GamePublisher._game_id}=@game_id";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {   
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@game_id", id));
+                command.ExecuteNonQuery();
+            }
+
+            expression = $"DELETE FROM {Game._games} " +
+               $"WHERE {Game._id}=@id";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@id", id));
+                command.ExecuteNonQuery();
+            }
+            return true;
         }
         #endregion
     }

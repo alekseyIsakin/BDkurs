@@ -20,8 +20,9 @@ namespace WpfApp1.Forms
     /// </summary>
     public partial class EditGameForm : Window
     {
-        Game selectedGame = Game.EMPTY;
-        GameInfo selectedGameInfo = new();
+        private Game selectedGame = Game.EMPTY;
+        private GameInfo selectedGameInfo = GameInfo.EMPTY;
+        private readonly int profile;
         public EditGameForm()
         {
             InitializeComponent();
@@ -45,6 +46,7 @@ namespace WpfApp1.Forms
         {
             InitializeComponent();
             FillGameList();
+            profile = _profile_id;
             selectedGame = DBreader.Get_Game(_game_id);
 
             for (int i = 0; i < GameComboBox.Items.Count; i++) 
@@ -60,7 +62,7 @@ namespace WpfApp1.Forms
             }
         }
 
-        private void FillGameList() 
+        private void FillGameList()
         {
             List<Game> games = DBreader.Get_games();
             games.Sort((v1, v2) => v1.Title.CompareTo(v2.Title));
@@ -95,6 +97,7 @@ namespace WpfApp1.Forms
             }
 
             DescriptionTexBlock.Text = selectedGame.Descriptions;
+            UpdateGameInfo(selectedGame);
         }
 
         private void AddPublisherClick(object sender, EventArgs e)
@@ -142,12 +145,50 @@ namespace WpfApp1.Forms
             selectedGame.Descriptions = DescriptionTexBlock.Text;
         }
 
+        private void DeleteButton_Click(object sender, RoutedEventArgs e) 
+        {
+            DBreader.DeleteGame(selectedGame);
+            FillGameList();
+
+            if (GameComboBox.Items.Count > 0)
+                GameComboBox.SelectedIndex= 0;
+        }
         private void AcceptButton_Click(object sender, RoutedEventArgs e)
         {
             if (selectedGame.ID == -1)
                 DBreader.AddNewGame(selectedGame);
             else
                 DBreader.UpdateGame(selectedGame);
+            FillGameList();
+            GameComboBox.SelectedIndex = 0;
+        }
+
+        private void UpdateGameInfo(Game selectedGame)
+        {
+            var gameInfo = DBreader.Get_my_games_infos(profile, selectedGame.ID);
+
+            if (gameInfo.Count == 0 || selectedGame.ID == -1)
+                selectedGameInfo = GameInfo.EMPTY;
+            else
+                selectedGameInfo = gameInfo.First();
+
+            gmInfoExecPath.Text = selectedGameInfo.executable_file;
+            gmInfoSavePath.Text = selectedGameInfo.save_file;
+            textBoxHours.Text = (selectedGameInfo.time_in_game / 60).ToString();
+            textBoxMinuts.Text = (selectedGameInfo.time_in_game % 60).ToString();
+        }
+        private void DeleteGameInfoButton_Click(object sender, RoutedEventArgs e) 
+        {
+            DBreader.DeleteMyGame(profile, selectedGameInfo.game_id);
+            UpdateGameInfo(selectedGame);
+        }
+        private void AcceptGameInfoButton_Click(object sender, RoutedEventArgs e) 
+        {
+            var myGame = DBreader.Get_my_games_infos(profile, selectedGameInfo.game_id);
+            if (myGame.Count == 0)
+                DBreader.SetupNewGame(selectedGameInfo);
+            else
+                DBreader.UpdateMyGame(selectedGameInfo);
         }
     }
 }

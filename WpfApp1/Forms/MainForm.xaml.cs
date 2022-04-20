@@ -22,11 +22,12 @@ namespace WpfApp1.Forms
     {
         private Profile _profile;
         private Window _login_form;
-
         private List<GameInfo> myGames = new();
+
         private Game selectedGame;
         private GameInfo selectedGameInfo;
 
+        private bool onlyMyGamesIsShow = true;
         public MainForm(Profile profile, Window parent)
         {
             InitializeComponent();
@@ -102,12 +103,14 @@ namespace WpfApp1.Forms
                 li.Selected += LiSelected;
                 listBoxItems.Add(li);
             };
+
+            onlyMyGamesIsShow = false;
             myGamesList.ItemsSource = listBoxItems;
         }
 
         private void ShowMyGames()
         {
-            myGames = DBreader.Get_my_games_info(_profile.ID);
+            myGames = DBreader.Get_my_games_infos(_profile.ID);
             List<ListBoxItem> listBoxItems = new();
 
             foreach (var g in myGames)
@@ -118,6 +121,8 @@ namespace WpfApp1.Forms
                 li.Selected += LiSelected;
                 listBoxItems.Add(li);
             };
+
+            onlyMyGamesIsShow = true;
             myGamesList.ItemsSource = listBoxItems;
         }
 
@@ -130,6 +135,12 @@ namespace WpfApp1.Forms
         {
             var editor = new EditGameForm(selectedGame.ID, _profile.ID);
             editor.ShowDialog();
+
+            if (onlyMyGamesIsShow)
+                ShowMyGames();
+            else
+                ShowAllGames();
+
         }
     }
 }
