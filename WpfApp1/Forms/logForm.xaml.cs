@@ -58,8 +58,8 @@ namespace WpfApp1
             DBreader.MyNewGame(3, profile_id: 1, 660);
             DBreader.MyNewGame(5, profile_id: 1, 0, @"E:\games\Hollow Knight\Hollow Knight.exe");
 
-            DBreader.MyNewGame(1, 2, 5);
-            DBreader.MyNewGame(4, 2, 3660);
+            DBreader.MyNewGame(1, profile_id: 2, 5);
+            DBreader.MyNewGame(4, profile_id: 2, 3660);
 
             DBreader.UpdateMyGame(game_id: 5, profile_id: 1, minuts_in_game: 4500);
         }
@@ -67,7 +67,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            recreate();
+            //recreate();
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)

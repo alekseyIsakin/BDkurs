@@ -28,7 +28,8 @@ namespace WpfApp1.Forms
             InitializeComponent();
             FillGameList();
 
-            selectedGame = DBreader.Get_Game(2);
+            selectedGame = DBreader.Get_Game(1);
+            profile = 1;
 
             for (int i = 0; i < GameComboBox.Items.Count; i++)
             {
@@ -41,6 +42,9 @@ namespace WpfApp1.Forms
                     break;
                 }
             }
+
+            if (GameComboBox.SelectedIndex == -1)
+                GameComboBox.SelectedIndex = 0;
         }
         public EditGameForm(int _game_id, int _profile_id)
         {
@@ -60,6 +64,9 @@ namespace WpfApp1.Forms
                     break;
                 }
             }
+
+            if (GameComboBox.SelectedIndex == -1)
+                GameComboBox.SelectedIndex = 0;
         }
 
         private void FillGameList()
@@ -127,55 +134,61 @@ namespace WpfApp1.Forms
             PublishersPanel.Children.Add(publControl);
         }
 
-        private void GameTitleTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            selectedGame.Title = GameTitleTextBox.Text;
-        }
-        private void ReleaseDatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            DateTime date = new();
-            if (ReleaseDatePicker.SelectedDate.HasValue)
-                date = ReleaseDatePicker.SelectedDate.Value;
-
-            selectedGame.Relese_date = date;
-        }
-
-        private void DescriptionTexBlock_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            selectedGame.Descriptions = DescriptionTexBlock.Text;
-        }
-
         private void DeleteButton_Click(object sender, RoutedEventArgs e) 
         {
-            DBreader.DeleteGame(selectedGame);
-            FillGameList();
+            int selected_ind = GameComboBox.SelectedIndex;
+            if (selectedGame.ID != -1) 
+            {
+                DBreader.DeleteGame(selectedGame);
+                FillGameList();
+                selected_ind -= 1;
+            }
 
-            if (GameComboBox.Items.Count > 0)
-                GameComboBox.SelectedIndex= 0;
+            GameComboBox.SelectedIndex = Math.Max(0, selected_ind);
         }
         private void AcceptButton_Click(object sender, RoutedEventArgs e)
         {
+            DateTime date = new();
+            int selected_ind = GameComboBox.SelectedIndex;
+
+            selectedGame.Title = GameTitleTextBox.Text;
+            if (ReleaseDatePicker.SelectedDate.HasValue)
+                date = ReleaseDatePicker.SelectedDate.Value;
+            selectedGame.Relese_date = date;
+            selectedGame.Descriptions = DescriptionTexBlock.Text;
+
             if (selectedGame.ID == -1)
-                DBreader.AddNewGame(selectedGame);
+                selectedGame.ID = DBreader.AddNewGame(selectedGame);
             else
                 DBreader.UpdateGame(selectedGame);
             FillGameList();
-            GameComboBox.SelectedIndex = 0;
-        }
 
+            AcceptGameInfoButton_Click(sender, new());
+            GameComboBox.SelectedIndex = selected_ind;
+        }
         private void UpdateGameInfo(Game selectedGame)
         {
+            ResetGameInfoColors();
             var gameInfo = DBreader.Get_my_games_infos(profile, selectedGame.ID);
 
             if (gameInfo.Count == 0 || selectedGame.ID == -1)
                 selectedGameInfo = GameInfo.EMPTY;
             else
                 selectedGameInfo = gameInfo.First();
+            
 
             gmInfoExecPath.Text = selectedGameInfo.executable_file;
             gmInfoSavePath.Text = selectedGameInfo.save_file;
             textBoxHours.Text = (selectedGameInfo.time_in_game / 60).ToString();
             textBoxMinuts.Text = (selectedGameInfo.time_in_game % 60).ToString();
+        }
+
+        private void ResetGameInfoColors() 
+        {
+            gmInfoExecPath.Background = Brushes.White;
+            gmInfoSavePath.Background = Brushes.White;
+            textBoxHours.Background   = Brushes.White;
+            textBoxMinuts.Background  = Brushes.White;
         }
         private void DeleteGameInfoButton_Click(object sender, RoutedEventArgs e) 
         {
@@ -184,11 +197,67 @@ namespace WpfApp1.Forms
         }
         private void AcceptGameInfoButton_Click(object sender, RoutedEventArgs e) 
         {
-            var myGame = DBreader.Get_my_games_infos(profile, selectedGameInfo.game_id);
+            selectedGameInfo.game_id = selectedGame.ID;
+            selectedGameInfo.profile_id = profile;
+
+            List<GameInfo> myGame = DBreader.Get_my_games_infos(
+                selectedGameInfo.profile_id, 
+                selectedGameInfo.game_id);
+
+            string path_to_exe = gmInfoExecPath.Text;
+            string path_to_save = gmInfoSavePath.Text;
+            string minuts_str = textBoxMinuts.Text;
+            string hours_str = textBoxHours.Text;
+
+            path_to_exe = path_to_exe.Replace("\"", "");
+            path_to_save = path_to_save.Replace("\"", "");
+
+            ulong.TryParse(minuts_str, out ulong minuts);
+            ulong.TryParse(hours_str, out ulong hours);
+            selectedGameInfo.time_in_game = (hours * 60) + minuts;
+
+            textBoxHours.Text = (selectedGameInfo.time_in_game / 60).ToString();
+            textBoxMinuts.Text = (selectedGameInfo.time_in_game % 60).ToString();
+
+            if (System.IO.File.Exists(path_to_exe)) 
+            {
+                gmInfoExecPath.Background = Brushes.White;
+                selectedGameInfo.executable_file = path_to_exe;
+            }
+            else 
+            {
+                gmInfoExecPath.Background = Brushes.Red;
+                selectedGameInfo.executable_file = "";
+            }
+
+            if (System.IO.File.Exists(path_to_save) || System.IO.Directory.Exists(path_to_save)) 
+            {
+                gmInfoExecPath.Background = Brushes.White;
+                selectedGameInfo.save_file = path_to_save;
+            }
+            else
+            {
+                gmInfoSavePath.Background = Brushes.Red;
+                selectedGameInfo.save_file = "";
+            }
+
+
             if (myGame.Count == 0)
                 DBreader.SetupNewGame(selectedGameInfo);
             else
                 DBreader.UpdateMyGame(selectedGameInfo);
+        }
+        private void textBoxHours_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            var math = System.Text.RegularExpressions.Regex.Replace(textBox.Text, @"([^0-9])*", string.Empty);
+
+            if (textBox.Text != math)
+            {
+                int crt = textBox.CaretIndex;
+                textBox.Text = math;
+                textBox.CaretIndex = crt - 1;
+            }
         }
     }
 }

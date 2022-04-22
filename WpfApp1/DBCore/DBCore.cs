@@ -27,7 +27,7 @@ namespace WpfApp1.DBcore
         public const string _relese_date = "release_date";
         public const string _descr = "description";
         public static Game EMPTY => new() { ID = -1, Descriptions = "", Publishers = new(), Relese_date = DateTime.Parse("1970/1/1"), Title = "new game" };
-        public string? Title { get; set; }
+        public string Title { get; set; }
         public DateTime Relese_date { get; set; }
         public int ID { get; set; }
         public List<Publisher> Publishers { get; set; }
@@ -327,12 +327,18 @@ namespace WpfApp1.DBcore
             }
             return true;
         }
-        static public bool AddNewGame(Game gm) 
+        static public int AddNewGame(Game gm) 
         {
-            return AddNewGame(gm.Title, gm.Relese_date, gm.Descriptions);
+            int id = AddNewGame(gm.Title, gm.Relese_date, gm.Descriptions);
+
+            foreach (var publ in gm.Publishers)
+                BindGamePublisher(id, publ.ID);
+
+            return id;
         }
-        static public bool AddNewGame(string title, DateTime date_MM_DD_GGGG, string descr="")
+        static public int AddNewGame(string title, DateTime date_MM_DD_GGGG, string descr="")
         {
+            int last_id = -1;
             string new_game_expression = $"INSERT INTO {Game._games} " +
                 $"({Game._title}, {Game._relese_date}, {Game._descr}) " +
                 $"VALUES (@title, @release_date, @descr);";
@@ -356,7 +362,29 @@ namespace WpfApp1.DBcore
 
                 command.ExecuteNonQuery();
             }
-            return true;
+
+            string last_id_expression = $"SELECT seq FROM sqlite_sequence " +
+                $"WHERE name='{Game._games}'";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = last_id_expression
+                };
+
+                var reader = command.ExecuteReader();
+
+                if (reader.Read()) 
+                {
+                    last_id = Convert.ToInt32(reader["seq"]);
+                }
+            }
+
+            return last_id;
         }
         static public bool BindGamePublisher(int game_id, int publisher_id)
         {
