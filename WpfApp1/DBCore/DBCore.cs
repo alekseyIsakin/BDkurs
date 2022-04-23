@@ -665,7 +665,7 @@ namespace WpfApp1.DBcore
         }
         #endregion
 
-        static public List<GameInfo> Get_my_games_infos(int profile_id, int game_id=-1)
+        static public List<GameInfo> Get_my_game_infos(int profile_id, int game_id=-1)
         {
             string expression = $"SELECT * FROM {GameInfo._game_infos} " +
                 $"WHERE {GameInfo._profile_id}=@profile_id";

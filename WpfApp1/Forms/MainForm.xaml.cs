@@ -110,7 +110,7 @@ namespace WpfApp1.Forms
 
         private void ShowMyGames()
         {
-            myGames = DBreader.Get_my_games_infos(_profile.ID);
+            myGames = DBreader.Get_my_game_infos(_profile.ID);
             List<ListBoxItem> listBoxItems = new();
 
             foreach (var g in myGames)
