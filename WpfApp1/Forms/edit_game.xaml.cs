@@ -23,6 +23,7 @@ namespace WpfApp1.Forms
         private Game selectedGame = Game.EMPTY;
         private GameInfo selectedGameInfo = GameInfo.EMPTY;
         private readonly int profile;
+        Controls.TempPopup popup = new();
         public EditGameForm()
         {
             InitializeComponent();
@@ -48,10 +49,12 @@ namespace WpfApp1.Forms
         }
         public EditGameForm(int _game_id, int _profile_id)
         {
-            InitializeComponent();
-            FillGameListUI();
             profile = _profile_id;
             selectedGame = DBreader.Get_Game(_game_id);
+
+            InitializeComponent();
+            FillGameListUI();
+            FillGameInfoUI(selectedGame);
 
             for (int i = 0; i < GameComboBox.Items.Count; i++) 
             {
@@ -107,6 +110,7 @@ namespace WpfApp1.Forms
             foreach (var g in games)
             {
                 ComboBoxItem li = new();
+                //li.MouseLeftButtonDown += GameLiSelected;
                 li.Content = g.Title;
                 li.DataContext = g.ID;
                 li.Selected += GameLiSelected;
@@ -153,21 +157,25 @@ namespace WpfApp1.Forms
         {
             var li = (ComboBoxItem)sender;
             int game_id = Convert.ToInt32(li.DataContext);
+
+            FillGameUIByID(game_id);
+            FillGameInfoUI(selectedGame);
+        }
+        private void FillGameUIByID(int game_id)
+        {
             selectedGame = DBreader.Get_Game(game_id);
 
             GameTitleTextBox.Text = selectedGame.Title;
             ReleaseDatePicker.SelectedDate = selectedGame.Relese_date;
 
             PublishersPanel.Children.Clear();
-            foreach (Publisher publ in selectedGame.Publishers) 
+            foreach (Publisher publ in selectedGame.Publishers)
             {
                 AddPublisher(publ);
             }
 
             DescriptionTexBlock.Text = selectedGame.Descriptions;
-            FillGameInfoUI(selectedGame);
         }
-
         private GameInfo GetGameInfoByUI()
         {
             GameInfo gi = GameInfo.EMPTY;
@@ -247,6 +255,8 @@ namespace WpfApp1.Forms
             FillGameListUI();
 
             selectedGameInfo = GetGameInfoByUI();
+
+            FillGameUIByID(selectedGame.ID);
             FillGameInfoUI(selectedGameInfo);
 
             myGame = DBreader.Get_my_game_infos(
@@ -255,23 +265,29 @@ namespace WpfApp1.Forms
 
             if (has_new_gameinfo == false)
             {
-                if (myGame.Count() > 0) 
+                if (myGame.Count() > 0)
                 {
                     DBreader.DeleteMyGame(
                         selectedGameInfo.profile_id,
                         selectedGameInfo.game_id);
+                    popup.Text = "Game has been removed from MyGames\n";
+                    myGame.Clear();
                 }
-                GameComboBox.SelectedIndex = selected_ind;
-                return;
             }
 
-
-            if (myGame.Count == 0)
+            if (myGame.Count == 0) 
+            {
                 DBreader.SetupNewGame(selectedGameInfo);
+                popup.Text = "Game has been removed from MyGames";
+            }
             else
                 DBreader.UpdateMyGame(selectedGameInfo);
 
             GameComboBox.SelectedIndex = selected_ind;
+
+            popup.PlacementTarget = (UIElement)sender;
+            popup.IsOpen = true;
+            popup.Show();
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e) 
         {
@@ -284,6 +300,10 @@ namespace WpfApp1.Forms
             }
 
             GameComboBox.SelectedIndex = Math.Max(0, selected_ind);
+
+            popup.PlacementTarget = (UIElement)sender;
+            popup.IsOpen = true;
+            popup.Show();
         }
         private void DeleteGameInfoButton_Click(object sender, RoutedEventArgs e) 
         {
@@ -315,6 +335,5 @@ namespace WpfApp1.Forms
             textBoxHours.IsEnabled = false;
             MyGame_checkBox.IsChecked = false;
         }
-
     }
 }
