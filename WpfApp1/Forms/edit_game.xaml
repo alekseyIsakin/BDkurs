@@ -1,5 +1,5 @@
 ﻿<Window x:Class="WpfApp1.Forms.EditGameForm"
-        xmlns:uc="clr-namespace:WpfApp1.Forms.Controls"
+        xmlns:uc="clr-namespace:WpfApp1.Forms.MyControls"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -65,7 +65,9 @@
                         Margin="3" VerticalAlignment="Top"/>
 
                     <StackPanel Grid.Column="1" Grid.Row="3">
-                        <uc:PublisherCmb PublisherCmbSelected="AddPublisherClick"/>
+                        <uc:PublisherCmb x:Name="PublishersCMB" 
+                                         PublisherCmbSelected="AddPublisherClick"
+                                         PublisherCmbDeleteClick="TotalDeletePublisherClick"/>
                         <Separator Margin="2"/>
                         <StackPanel Name="PublishersPanel" >
                         </StackPanel>

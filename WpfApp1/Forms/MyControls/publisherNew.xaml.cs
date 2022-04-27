@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfApp1.DBcore;
 
-namespace WpfApp1.Forms.Controls
+namespace WpfApp1.Forms.MyControls
 {
     /// <summary>
     /// Логика взаимодействия для UserControl1.xaml

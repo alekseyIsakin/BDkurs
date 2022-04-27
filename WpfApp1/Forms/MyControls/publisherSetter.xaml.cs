@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfApp1.DBcore;
 
-namespace WpfApp1.Forms.Controls
+namespace WpfApp1.Forms.MyControls
 {
     /// <summary>
     /// Логика взаимодействия для publisherSetter.xaml
@@ -29,6 +29,10 @@ namespace WpfApp1.Forms.Controls
             this.DataContext = this;
         }
 
+        public void RaiseDelClick() 
+        {
+            DelClick?.Invoke(this, new());
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DelClick?.Invoke(this, new());

@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfApp1.Forms.Controls
+namespace WpfApp1.Forms.MyControls
 {
     /// <summary>
     /// Логика взаимодействия для TempPopup.xaml
@@ -21,30 +21,50 @@ namespace WpfApp1.Forms.Controls
     public partial class TempPopup : System.Windows.Controls.Primitives.Popup
     {
         private System.Windows.Threading.DispatcherTimer timer = new();
-        public string Text { get; set; } = "empty";
-        byte alpha = 255;
+        const int startAlpha = 400;
+        int alpha = 255;
         byte step = 5;
         public TempPopup()
         {
             InitializeComponent();
             DataContext = this;
-        }
-        public void Show() 
-        {
-            timer.Interval = TimeSpan.FromMilliseconds(25);
-            timer.Start();
             timer.Tick += timerTick;
+            timer.Interval = TimeSpan.FromMilliseconds(25);
+        }
+        public void Show(string msg) 
+        {
+            IsOpen = false;
+            alpha = startAlpha;
+            textLabel.Content = msg;
+            IsOpen = true;
+            timer.Start();
+
         }
         private void timerTick(object? sender, EventArgs e)
         {
-            Panel.Background = new SolidColorBrush(Color.FromArgb(alpha, 0, 255,0));
-            alpha -= step;
-
-            if (alpha < step) 
+            Dispatcher.Invoke(new Action(() => 
             {
-                timer.Stop();
-                IsOpen = false;
-            }
+                Panel.Background = new SolidColorBrush(Color.FromArgb(
+                    (byte)Math.Min(255, alpha), 
+                    0, 255,0));
+                alpha -= step;
+
+                if (alpha < step) 
+                {
+                    IsOpen = false;
+                    timer.Stop();
+                }
+            }));
+        }
+
+        private void Popup_MouseEnter(object sender, MouseEventArgs e)
+        {
+            timer.Stop();
+        }
+
+        private void Popup_MouseLeave(object sender, MouseEventArgs e)
+        {
+            timer.Start();
         }
     }
 }

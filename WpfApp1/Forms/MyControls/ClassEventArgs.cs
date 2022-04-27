@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WpfApp1.DBcore;
 
-namespace WpfApp1.Forms.Controls
+namespace WpfApp1.Forms.MyControls
 {
     public class PublisherEventArgs : EventArgs
     {

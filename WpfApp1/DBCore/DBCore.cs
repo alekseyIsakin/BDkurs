@@ -107,6 +107,7 @@ namespace WpfApp1.DBcore
             connectStr = $"Data Source={db_name};";
         }
 
+
         static public void Create()
         {
             string createMode = connectStr + "Mode=ReadWriteCreate;Foreign Keys=true;";
@@ -300,12 +301,17 @@ namespace WpfApp1.DBcore
 
             return profile;
         }
-#endregion
+        #endregion
 
-#region Set Data
-        static public bool AddNewPublisher(string name)
+        #region Set Data
+        internal static int AddNewPublisher(Publisher publ)
         {
-            if (Check_publisher_by_name(name))
+            return AddNewPublisher(publ.Name);
+        }
+        static public int AddNewPublisher(string name)
+        {
+            int last_id = -1;
+            if (CheckPublisherByName(name) == false)
                 throw new Exception($"This name [{name}] is already used");
 
             string new_publisher_expression = $"INSERT INTO {Publisher._publisher} ({Publisher._name}) VALUES (@name)";
@@ -325,8 +331,31 @@ namespace WpfApp1.DBcore
 
                 command.ExecuteNonQuery();
             }
-            return true;
+
+            string last_id_expression = $"SELECT seq FROM sqlite_sequence " +
+               $"WHERE name='{Publisher._publisher}'";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = last_id_expression
+                };
+
+                var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    last_id = Convert.ToInt32(reader["seq"]);
+                }
+            }
+
+            return last_id;
         }
+
         static public int AddNewGame(Game gm) 
         {
             int id = AddNewGame(gm.Title, gm.Relese_date, gm.Descriptions);
@@ -386,6 +415,7 @@ namespace WpfApp1.DBcore
 
             return last_id;
         }
+
         static public bool BindGamePublisher(int game_id, int publisher_id)
         {
             string new_game_expression = $"INSERT INTO {GamePublisher._game_publisher} " +
@@ -520,9 +550,9 @@ namespace WpfApp1.DBcore
                     game = new()
                     {
                         ID = Convert.ToInt32(gamesReader[Game._id]),
-                        Title = gamesReader[Game._title].ToString(),
+                        Title = gamesReader[Game._title].ToString() ?? "title",
                         Descriptions = gamesReader[Game._descr].ToString(),
-                        Relese_date = DateTime.Parse(gamesReader[Game._relese_date].ToString()),
+                        Relese_date = DateTime.Parse(gamesReader[Game._relese_date].ToString() ?? ""),
                     };
                 }
             }
@@ -532,10 +562,31 @@ namespace WpfApp1.DBcore
 
             return game;
         }
+        static public bool CheckGameByName(string title) 
+        {
+            string expression = $"SELECT {Game._id} FROM {Game._games} WHERE {Game._title}=@title";
+            object? gamesReader;
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadOnly;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                SqliteParameter param = new("@title", title);
+                command.Parameters.Add(param);
+                gamesReader = command.ExecuteScalar();
+
+            }
+            return gamesReader != null;
+        }
         #endregion
-        
+
         #region Publishers
-        static private bool Check_publisher_by_name(string name)
+        static public bool CheckPublisherByName(string name)
         {
             string expression = $"SELECT COUNT({Publisher._name}) FROM {Publisher._publisher} WHERE {Publisher._name}=@name";
             object? profile_exist;
@@ -555,9 +606,7 @@ namespace WpfApp1.DBcore
                 profile_exist = command.ExecuteScalar();
             }
 
-            if (Convert.ToInt32(profile_exist) == 0)
-                return false;
-            return true;
+            return profile_exist != null;
         }
         static public List<Publisher> Get_publishers()
         {
@@ -920,6 +969,31 @@ namespace WpfApp1.DBcore
                 command.ExecuteNonQuery();
             }
             return true;
+        }
+        static public void DeletePublisher(Publisher publ)
+        {
+            DeletePublisher(publ.ID);
+        }
+        static public void DeletePublisher(int id) 
+        {
+            string expression = $"DELETE FROM {GamePublisher._game_publisher} " +
+                    $"WHERE {GamePublisher._publisher_id}=@publisher_id;" +
+                    $"DELETE FROM {Publisher._publisher} " +
+                    $"WHERE {Publisher._id}=@publisher_id;";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                command.Parameters.Add(new SqliteParameter("@publisher_id", id));
+                command.ExecuteNonQuery();
+            }
+
         }
         #endregion
     }

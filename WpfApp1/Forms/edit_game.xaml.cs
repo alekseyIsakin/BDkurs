@@ -23,7 +23,7 @@ namespace WpfApp1.Forms
         private Game selectedGame = Game.EMPTY;
         private GameInfo selectedGameInfo = GameInfo.EMPTY;
         private readonly int profile;
-        Controls.TempPopup popup = new();
+        MyControls.TempPopup popup = new();
         public EditGameForm()
         {
             InitializeComponent();
@@ -75,23 +75,61 @@ namespace WpfApp1.Forms
 
         private void AddPublisherClick(object sender, EventArgs e)
         {
-            Publisher publ = ((Controls.PublisherEventArgs)e).slectedPublisher;
-
+            Publisher publ = ((MyControls.PublisherEventArgs)e).slectedPublisher;
             if (selectedGame.Publishers.Contains(publ))
                 return;
+
+            if (publ.ID == -1 && DBreader.CheckPublisherByName(publ.Name)) 
+            {
+                var res = MessageBox.Show($"Append new publisher [{publ.Name}] to DataBase", "Warning", MessageBoxButton.YesNo);
+
+                if (res == MessageBoxResult.Yes) 
+                {
+                    publ.ID = DBreader.AddNewPublisher(publ);
+                    PublishersCMB.ReloadPublishers();
+                }
+            }
+
+            if (publ.ID == -1) return;
+
             selectedGame.Publishers.Add(publ);
             AddPublisher(publ);
         }
         private void AddPublisher(Publisher publ)
         {
-            Controls.publisherSetter publControl = new() { publisher = publ };
+            MyControls.publisherSetter publControl = new() { publisher = publ };
 
             publControl.DelClick += RemovePublControl;
             PublishersPanel.Children.Add(publControl);
         }
+        private void TotalDeletePublisherClick(object sender, EventArgs e)
+        {
+            Publisher publ = ((MyControls.PublisherEventArgs)e).slectedPublisher;
+            Action DeletePublisherControl = () => {; };
+
+
+            if (selectedGame.Publishers.Contains(publ)) 
+                foreach (MyControls.publisherSetter pub in PublishersPanel.Children)
+                {
+                    if (pub.publisher.Name == publ.Name)
+                    {
+                        DeletePublisherControl = pub.RaiseDelClick;
+                        break;
+                    }
+                }
+
+            var res = MessageBox.Show($"Delete [{publ.Name}] from DataBase\nAre you sure?\nthis action cannot be undone", "Warning", MessageBoxButton.YesNo);
+
+            if (publ.ID != -1 && res == MessageBoxResult.Yes) 
+            {
+                DeletePublisherControl();
+                DBreader.DeletePublisher(publ);
+                PublishersCMB.ReloadPublishers();
+            }
+        }
         private void RemovePublControl(object sender, EventArgs args) 
         {
-            var control = sender as Controls.publisherSetter;
+            var control = sender as MyControls.publisherSetter;
 
             if (selectedGame.Publishers.Contains(control.publisher))
                 selectedGame.Publishers.Remove(control.publisher);
@@ -263,6 +301,8 @@ namespace WpfApp1.Forms
                 selectedGameInfo.profile_id,
                 selectedGameInfo.game_id);
 
+            string msg = "Changes have been applied";
+
             if (has_new_gameinfo == false)
             {
                 if (myGame.Count() > 0)
@@ -270,27 +310,32 @@ namespace WpfApp1.Forms
                     DBreader.DeleteMyGame(
                         selectedGameInfo.profile_id,
                         selectedGameInfo.game_id);
-                    popup.Text = "Game has been removed from MyGames\n";
+                    msg += "\nGame has been removed from MyGames";
                     myGame.Clear();
                 }
             }
-
-            if (myGame.Count == 0) 
+            else 
             {
-                DBreader.SetupNewGame(selectedGameInfo);
-                popup.Text = "Game has been removed from MyGames";
+                if (myGame.Count == 0)
+                {
+                    DBreader.SetupNewGame(selectedGameInfo);
+                    msg += "\nGame added to MyGames";
+                }
+                else 
+                {
+                    DBreader.UpdateMyGame(selectedGameInfo);
+                    msg += "\nMyGame has been updated";
+                }
             }
-            else
-                DBreader.UpdateMyGame(selectedGameInfo);
 
             GameComboBox.SelectedIndex = selected_ind;
 
             popup.PlacementTarget = (UIElement)sender;
-            popup.IsOpen = true;
-            popup.Show();
+            popup.Show(msg);
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e) 
         {
+            string msg = "Game has been removed from library";
             int selected_ind = GameComboBox.SelectedIndex;
             if (selectedGame.ID != -1) 
             {
@@ -303,7 +348,7 @@ namespace WpfApp1.Forms
 
             popup.PlacementTarget = (UIElement)sender;
             popup.IsOpen = true;
-            popup.Show();
+            popup.Show(msg);
         }
         private void DeleteGameInfoButton_Click(object sender, RoutedEventArgs e) 
         {
