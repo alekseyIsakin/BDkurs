@@ -9,7 +9,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,11 +17,24 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="TitleFilter"
+        <TextBox x:Name="titleFilter" Margin="3"
                  Grid.Row="0"/>
-        <ComboBox Name="PublisherFilter"
-                 Grid.Row="1"/>
-        <CheckBox x:Name="InstalledCheck" Content="Installed"
+        <CheckBox x:Name="titleEnable" VerticalAlignment="Center"
+                 Grid.Row="0" Grid.Column="1"/>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <local:PublisherCmb x:Name="publisherFilter" PublisherCmbSelected="publisherFilter_PublisherCmbSelected"/>
+            <Separator Grid.Row="1" Margin="3"/>
+            <StackPanel Grid.Row="2" Name="PublishersPanel" />
+
+        </Grid>
+
+        <CheckBox x:Name="installedCheck" Content="Installed"  VerticalAlignment="Center" Margin="3"
                  Grid.Row="2"/>
     </Grid>
 </UserControl>

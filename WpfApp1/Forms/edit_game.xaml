@@ -36,10 +36,11 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="80" x:Name="FilterRow"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
@@ -50,21 +51,21 @@
                           VerticalAlignment="Center" Margin="3"/>
 
                     <Label Content="Game title:" 
-                       Grid.Column="0" Grid.Row="1"
+                       Grid.Column="0" Grid.Row="2"
                        Margin="3" VerticalAlignment="Center"/>
-                    <TextBox Name="GameTitleTextBox" Grid.Row="1" Grid.Column="1"
+                    <TextBox Name="GameTitleTextBox" Grid.Row="2" Grid.Column="1"
                          Margin="3" VerticalAlignment="Center"/>
 
                     <Label Content="Release Date:" 
-                       Grid.Column="0" Grid.Row="2"
+                       Grid.Column="0" Grid.Row="3"
                        Margin="3" VerticalAlignment="Center"/>
                     <DatePicker Name="ReleaseDatePicker" Margin="3"
-                        Grid.Column="1" Grid.Row="2"/>
+                        Grid.Column="1" Grid.Row="3"/>
                     <Label Content="Publishers:"  
-                        Grid.Column="0" Grid.Row="3"
+                        Grid.Column="0" Grid.Row="4"
                         Margin="3" VerticalAlignment="Top"/>
 
-                    <StackPanel Grid.Column="1" Grid.Row="3">
+                    <StackPanel Grid.Column="1" Grid.Row="4">
                         <uc:PublisherCmb x:Name="PublishersCMB" 
                                          PublisherCmbSelected="AddPublisherClick"
                                          PublisherCmbDeleteClick="TotalDeletePublisherClick"/>
@@ -75,20 +76,20 @@
 
 
                     <Label Content="Description:"  
-                       Grid.Column="0" Grid.Row="4"
+                       Grid.Column="0" Grid.Row="5"
                        Margin="3" VerticalAlignment="Top"/>
                     <TextBox Name="DescriptionTexBlock" Margin="3" TextWrapping="Wrap"
-                       Grid.Column="1" Grid.Row="4"/>
+                       Grid.Column="1" Grid.Row="5"/>
 
                     <Button Content="Accept" Click="AcceptButton_Click"
-                             Grid.Row="5" Margin="3"/>
+                             Grid.Row="6" Margin="3"/>
                     <Button Content="Delete" Click="DeleteButton_Click"
-                             Grid.Row="5" Grid.Column="1" Width="90" HorizontalAlignment="Left" Margin="3"/>
+                             Grid.Row="6" Grid.Column="1" Width="90" HorizontalAlignment="Left" Margin="3"/>
                 </Grid>
             </ScrollViewer>
 
             <Canvas Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Background="#FFAAAAAA" Margin="3"/>
-            
+
             <Grid Grid.Column="2" Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -128,6 +129,8 @@
                 </DockPanel>
                 <Button Content="Clear" Click="DeleteGameInfoButton_Click"
                              Grid.Row="4" Grid.Column="0" Width="90" HorizontalAlignment="Left" Margin="3"/>
+
+                <uc:GameListFilter Grid.Column="1" Grid.Row="6"/>
             </Grid>
         </Grid>
     </DockPanel>

@@ -46,6 +46,7 @@ namespace WpfApp1.Forms
 
             if (GameComboBox.SelectedIndex == -1)
                 GameComboBox.SelectedIndex = 0;
+            FilterRow.Height = new GridLength(0);
         }
         public EditGameForm(int _game_id, int _profile_id)
         {

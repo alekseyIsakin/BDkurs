@@ -8,10 +8,17 @@ using System.Collections.Generic;
 
 namespace WpfApp1.DBcore
 {
+    public struct TagList 
+    {
+        public const string _taglist= "tag_list";
+        public const string _id= "tag_id";
+        public const string _descr= "descr";
+
+    }
     public struct Profile
     {
         public const string _profiles = "profiles";
-        public const string _id = "id";
+        public const string _id = "profile_id";
         public const string _name = "name";
         public const string _passw_hash = "passw_hash";
 
@@ -23,9 +30,10 @@ namespace WpfApp1.DBcore
         public const string _games = "games";
         public const string _game_publishers = "game_publishers";
         public const string _title = "title";
-        public const string _id = "id";
+        public const string _id = "game_id";
         public const string _relese_date = "release_date";
         public const string _descr = "description";
+        public const string _tag = "tag_id";
         public static Game EMPTY => new() { ID = -1, Descriptions = "", Publishers = new(), Relese_date = DateTime.Parse("1970/1/1"), Title = "new game" };
         public string Title { get; set; }
         public DateTime Relese_date { get; set; }
@@ -44,7 +52,7 @@ namespace WpfApp1.DBcore
     public struct Publisher
     {
         public const string _publisher = "publishers";
-        public const string _id = "id";
+        public const string _id = "publisher_id";
         public const string _name = "name";
         public int ID { get; set; }
         public string Name { get; set; }
@@ -123,6 +131,10 @@ namespace WpfApp1.DBcore
 											{Game._descr} TEXT,
 											{Game._relese_date} TEXT);";
 
+            string createTableTags = @$"CREATE TABLE {TagList._taglist}(
+											{TagList._id} INTEGER PRIMARY KEY AUTOINCREMENT,
+											{TagList._descr} TEXT);";
+
             string createTableGameIfo = @$"CREATE TABLE {GameInfo._game_infos}(
 											{GameInfo._game_id} INTEGER,
 											{GameInfo._profile_id} INTEGER,
@@ -164,6 +176,7 @@ namespace WpfApp1.DBcore
                         + createTableGameIfo
                         + createTablePublishers
                         + createTableGamePublishers
+                        + createTableTags
                 };
                 command.ExecuteNonQuery();
             }
@@ -365,6 +378,51 @@ namespace WpfApp1.DBcore
 
             return id;
         }
+        static public int AddNewTag(string descr)
+        {
+            int last_id = -1;
+            string new_game_expression = $"INSERT INTO {TagList._taglist} " +
+                $"({TagList._descr}) " +
+                $"VALUES (@descr);";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = new_game_expression
+                };
+
+                command.Parameters.Add(new("@descr", descr));
+                command.ExecuteNonQuery();
+            }
+
+            string last_id_expression = $"SELECT seq FROM sqlite_sequence " +
+              $"WHERE name='{TagList._taglist}'";
+
+            using (var connection = new SqliteConnection(connectStr))
+            {
+                connection.Open();
+
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = last_id_expression
+                };
+
+                var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    last_id = Convert.ToInt32(reader["seq"]);
+                }
+            }
+
+            return last_id;
+        }
+
         static public int AddNewGame(string title, DateTime date_MM_DD_GGGG, string descr="")
         {
             int last_id = -1;

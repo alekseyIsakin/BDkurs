@@ -24,5 +24,10 @@ namespace WpfApp1.Forms.MyControls
         {
             InitializeComponent();
         }
+
+        private void publisherFilter_PublisherCmbSelected(object sender, EventArgs e)
+        {
+
+        }
     }
 }
