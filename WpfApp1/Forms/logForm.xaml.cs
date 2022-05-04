@@ -67,6 +67,8 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+            if (DBreader.IsCreate == false)
+                DBreader.Create();
             //recreate();
         }
 
