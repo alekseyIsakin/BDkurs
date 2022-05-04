@@ -31,20 +31,28 @@ namespace WpfApp1.Forms
         {
             InitializeComponent();
             _login_form = parent;
-
+            ReloadMyGames();
             ShowMyGames();
+        }
+
+        private void ReloadMyGames()
+        {
+            myGames = DBreader.Get_my_game_infos(DBreader.ActiveProfile.ID);
         }
 
         private void LiSelected(object sender, RoutedEventArgs e)
         {
             int id = Convert.ToInt32((sender as ListBoxItem).DataContext);
-
             selectedGame = DBreader.Get_Game(id);
+            UpdateGameUIByID();
+        }
 
+        private void UpdateGameUIByID()
+        {
             labelGameTitle.Content = selectedGame.Title;
 
             textDescription.Text = "\nPublishers:\n";
-            foreach (Publisher publ in selectedGame.Publishers ?? new(){ }) 
+            foreach (Publisher publ in selectedGame.Publishers ?? new() { })
             {
                 textDescription.Text += $"{publ.Name}\n";
             }
@@ -62,13 +70,14 @@ namespace WpfApp1.Forms
                 selectedGameInfo = selected_game.First();
                 TimeSpan timeInGame = TimeSpan.FromMinutes(selectedGameInfo.time_in_game);
                 bool has_exe = selectedGameInfo.executable_file != "";
+                PlayButton.ToolTip = selectedGameInfo.executable_file;
 
                 PlayButton.IsEnabled = has_exe;
                 timeInGameLabel.Content = $"{ Math.Floor(timeInGame.TotalHours)}:{timeInGame:mm}";
             }
-            else 
+            else
             {
-                timeInGameLabel.Content = $"00:00";
+                timeInGameLabel.Content = $"0:00";
                 PlayButton.IsEnabled = false;
                 selectedGameInfo = new();
             }
@@ -101,12 +110,6 @@ namespace WpfApp1.Forms
         {
             ShowAllGames();
         }
-
-        private void ShowFilteredGames()
-        {
-            List<Game> games = advanceFilter.GetFilteredGames();
-            FillGamePanel(games);
-        }
         private void ShowAllGames()
         {
             List<Game> games = DBreader.GetGamesByFilter(title:"", publID:null, isInstalled:null, myGames: null);
@@ -133,6 +136,7 @@ namespace WpfApp1.Forms
             else
                 ShowAllGames();
 
+            ReloadMyGames();
         }
         private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e) 
         {
@@ -152,6 +156,51 @@ namespace WpfApp1.Forms
         {
             List<Game> games = ((MyControls.GameFilterEventArg)e).newGames;
             FillGamePanel(games);
+        }
+
+        DateTime lastRunningTime;
+        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedGameInfo.executable_file == "") return;
+            lastRunningTime = DateTime.Now;
+            WindowState = WindowState.Minimized;
+
+            System.Threading.Thread thread = new(() =>
+            {
+                System.Diagnostics.Process proc = new();
+                proc.StartInfo.FileName = selectedGameInfo.executable_file;
+
+                try
+                {
+                    proc.Start();
+                    proc.WaitForExit();
+                }
+                catch (Exception excep)
+                {
+                    MessageBox.Show($"Error [{excep.Message}]", "Warning");
+                }
+                proc.Dispose();
+                this.ThreadEnd();
+            });
+            thread.Start();
+        }
+
+        private void ThreadEnd()
+        {
+            this.Dispatcher.Invoke(()=> 
+            {
+                TimeSpan gameTime = DateTime.Now - lastRunningTime;
+                selectedGameInfo.time_in_game += (ulong)gameTime.TotalMinutes;
+                DBreader.UpdateMyGame(selectedGameInfo);
+
+                ReloadMyGames();
+                if (onlyMyGamesIsShow)
+                    ShowMyGames();
+                else
+                    ShowAllGames();
+                UpdateGameUIByID();
+                WindowState = WindowState.Normal;
+            });
         }
     }
 }

@@ -57,11 +57,11 @@
                 <Label Grid.Column="0" Grid.Row="1"
                        Content="Time in game:" Margin="3"/>
                 <Label Grid.Column="1" Grid.Row="1"
-                       Content="00:00" Margin="3" HorizontalContentAlignment="Right"
+                       Content="0:00" Margin="3" HorizontalContentAlignment="Right"
                        Name="timeInGameLabel"/>
-                <Button Grid.Column="2" Grid.Row="1"
-                        Height="20" Width="50" Name="PlayButton" ToolTip="Hi"
-                        Content="Play" Margin="3" IsEnabled="False">
+                <Button Grid.Column="2" Grid.Row="1" IsEnabled="False"
+                        Height="20" Width="50" Name="PlayButton"
+                        Content="Play" Margin="3" Click="PlayButton_Click">
                 </Button>
                 <Button Content="Edit" Height="20" Width="50"
                         Click="EditGameClick"

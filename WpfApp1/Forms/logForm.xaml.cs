@@ -67,9 +67,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            recreate();
-            DBreader.CheckGameByName("asd");
-            DBreader.CheckGameByName("Elden Ring");
+            //recreate();
         }
 
         private void LogIn_Click(object sender, RoutedEventArgs e)
