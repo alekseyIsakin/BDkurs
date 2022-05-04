@@ -31,6 +31,11 @@ namespace WpfApp1.Forms.MyControls
             ReloadPublishers();
         }
 
+        internal void DisableDelBtn()
+        {
+            DelBtn.IsEnabled = false;
+        }
+
         public void ReloadPublishers()
         {
             try

@@ -22,7 +22,7 @@ namespace WpfApp1.Forms
     {
         private Game selectedGame = Game.EMPTY;
         private GameInfo selectedGameInfo = GameInfo.EMPTY;
-        private readonly int profile;
+        private Profile profile => DBcore.DBreader.ActiveProfile;
         MyControls.TempPopup popup = new();
         public EditGameForm()
         {
@@ -30,7 +30,6 @@ namespace WpfApp1.Forms
             FillGameListUI();
 
             selectedGame = DBreader.Get_Game(1);
-            profile = 1;
 
             for (int i = 0; i < GameComboBox.Items.Count; i++)
             {
@@ -46,11 +45,9 @@ namespace WpfApp1.Forms
 
             if (GameComboBox.SelectedIndex == -1)
                 GameComboBox.SelectedIndex = 0;
-            FilterRow.Height = new GridLength(0);
         }
-        public EditGameForm(int _game_id, int _profile_id)
+        public EditGameForm(int _game_id)
         {
-            profile = _profile_id;
             selectedGame = DBreader.Get_Game(_game_id);
 
             InitializeComponent();
@@ -140,7 +137,11 @@ namespace WpfApp1.Forms
 
         private void FillGameListUI()
         {
-            List<Game> games = DBreader.Get_games();
+            List<Game> games = advanceFilter.GetFilteredGames();
+            FillGameListUI(games);
+        }
+        private void FillGameListUI(List<Game> games)
+        {
             games.Sort((v1, v2) => string.Compare(v1.Title, v2.Title, StringComparison.Ordinal));
             games.Add(Game.EMPTY);
 
@@ -157,10 +158,11 @@ namespace WpfApp1.Forms
             };
             GameComboBox.ItemsSource = listBoxItems;
         }
+
         private void FillGameInfoUI(Game selectedGame)
         {
             ResetGameInfoColors();
-            var gameInfo = DBreader.Get_my_game_infos(profile, selectedGame.ID);
+            var gameInfo = DBreader.Get_my_game_infos(profile.ID, selectedGame.ID);
 
             if (gameInfo.Count == 0 || selectedGame.ID == -1)
             {
@@ -219,7 +221,7 @@ namespace WpfApp1.Forms
         {
             GameInfo gi = GameInfo.EMPTY;
             gi.game_id = selectedGame.ID;
-            gi.profile_id = profile;
+            gi.profile_id = profile.ID;
 
 
             string path_to_exe  = gmInfoExecPath.Text;
@@ -353,7 +355,7 @@ namespace WpfApp1.Forms
         }
         private void DeleteGameInfoButton_Click(object sender, RoutedEventArgs e) 
         {
-            DBreader.DeleteMyGame(profile, selectedGameInfo.game_id);
+            DBreader.DeleteMyGame(profile.ID, selectedGameInfo.game_id);
             FillGameInfoUI(selectedGame);
         }
 
@@ -380,6 +382,26 @@ namespace WpfApp1.Forms
             textBoxMinuts.IsEnabled = false;
             textBoxHours.IsEnabled = false;
             MyGame_checkBox.IsChecked = false;
+        }
+
+        private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (advanceFilter.Visibility == Visibility.Visible)
+            {
+                toggleFilterBtn.Content = "Show";
+                advanceFilter.Visibility = Visibility.Collapsed;
+            }
+            else 
+            {
+                toggleFilterBtn.Content = "Hide";
+                advanceFilter.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void advanceFilter_Apply(object sender, EventArgs e)
+        {
+            List<Game> games = ((MyControls.GameFilterEventArg)e).newGames;
+            FillGameListUI(games);
         }
     }
 }

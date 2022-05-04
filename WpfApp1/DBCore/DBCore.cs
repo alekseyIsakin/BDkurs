@@ -22,6 +22,7 @@ namespace WpfApp1.DBcore
         public const string _name = "name";
         public const string _passw_hash = "passw_hash";
 
+        public static Profile EMPTY { get => new Profile() { ID=-1, Nick="" }; }
         public int ID { get; set; }
         public string? Nick { get; set; }
     }
@@ -105,10 +106,11 @@ namespace WpfApp1.DBcore
     {
         public static readonly string db_name = "data.db";
         private static readonly string connectStr;
-        private static string connectedNick = "";
 
 
         public static bool IsCreate => System.IO.File.Exists(db_name);
+
+        public static Profile ActiveProfile { get; private set; }
 
         static DBreader()
         {
@@ -215,7 +217,7 @@ namespace WpfApp1.DBcore
             string given_hash = Convert.ToBase64String(utf8);
 
             if (given_hash == store_hash)
-                connectedNick = nick;
+                ActiveProfile = Get_profile( nick);
 
             return given_hash == store_hash;
         }
@@ -253,9 +255,10 @@ namespace WpfApp1.DBcore
                 command.ExecuteNonQuery();
             }
 
-            connectedNick = nick;
+            ActiveProfile = Get_profile(nick);
             return true;
         }
+
         static private bool Check_profile_by_name(string nick)
         {
             string expression = $"SELECT COUNT(*) FROM {Profile._profiles} WHERE {Profile._name}=@name";
@@ -280,7 +283,7 @@ namespace WpfApp1.DBcore
                 return false;
             return true;
         }
-        static public void SignOut() { connectedNick = ""; }
+        static public void SignOut() { ActiveProfile = Profile.EMPTY; }
         static public Profile Get_profile(string nick) 
         {
             string expression = $"SELECT {Profile._id} FROM {Profile._profiles} " +
@@ -620,6 +623,97 @@ namespace WpfApp1.DBcore
 
             return game;
         }
+        static public List<Game> GetGamesByFilter(string title, List<int>? publID, bool? isInstalled, bool? myGames)
+        {
+            string expression = $"SELECT " +
+                $"{Game._games}.{Game._id},{Game._games}.{Game._title}," +
+                $"{Game._games}.{Game._descr},{Game._games}.{Game._relese_date} " +
+                $"FROM {Game._games} ";
+                
+
+            SqliteDataReader gamesReader;
+            Stack<SqliteParameter> param = new();
+            List<Game> games = new();
+            Stack<string> expressionWhere = new();
+
+            if (title != "")
+            {
+                expressionWhere.Push($" ({Game._title} like @title) ");
+                param.Push(new("@title", title + '%'));
+            }
+
+            if (publID?.Count > 0)
+            {
+                string tmp = $"(";
+                for (int i = 0; i < publID.Count; i++)
+                {
+                    string or = i < publID.Count - 1 ? " OR " : "";
+                    tmp += $" {GamePublisher._publisher_id}=@publ{i}" + or;
+                    param.Push(new($"@publ{i}", publID[i]));
+                }
+                tmp += ")";
+                expressionWhere.Push(tmp);
+            }
+
+            if (isInstalled != null)
+            {
+                string tmp = isInstalled.Value ? "NOT " : " ";
+                tmp += $"{GameInfo._executable_file}=\'\' ";
+                expressionWhere.Push(tmp);
+            }
+
+            if (myGames != null)
+            {
+                expression += $"LEFT JOIN {GameInfo._game_infos} ON {GameInfo._game_infos}.{GameInfo._game_id}={Game._games}.{Game._id} ";
+                if (myGames == true) 
+                    expressionWhere.Push($" ({Profile._id}=@profile_id) ");
+                param.Push(new SqliteParameter("@profile_id", ActiveProfile.ID));
+            }
+
+            if (expressionWhere.Count > 0)
+                expression += " WHERE ";
+
+            while (expressionWhere.Count > 0)
+            {
+                string and = expressionWhere.Count > 1 ? " AND " : "";
+                expression += expressionWhere.Pop() + and;
+            }
+
+            if (myGames != null && myGames == false)
+            {
+            }
+
+            expression += ";";
+
+            using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))
+            {
+                connection.Open();
+                SqliteCommand command = new()
+                {
+                    Connection = connection,
+                    CommandText = expression
+                };
+
+                while (param.Count > 0)
+                    command.Parameters.Add(param.Pop());
+                gamesReader = command.ExecuteReader();
+
+                while (gamesReader.Read())
+                {
+                    Game game = new()
+                    {
+                        ID = Convert.ToInt32(gamesReader[Game._id]),
+                        Title = gamesReader[Game._title].ToString() ?? "title",
+                        Descriptions = gamesReader[Game._descr].ToString(),
+                        Relese_date = DateTime.Parse(gamesReader[Game._relese_date].ToString() ?? ""),
+                    };
+                    game.Publishers = Get_publishers_by_game_id(game.ID);
+                    games.Add(game);
+                }
+            }
+
+            return games;
+        }
         static public bool CheckGameByName(string title) 
         {
             string expression = $"SELECT {Game._id} FROM {Game._games} WHERE {Game._title}=@title";
@@ -771,7 +865,6 @@ namespace WpfApp1.DBcore
             return publisher;
         }
         #endregion
-
         static public List<GameInfo> Get_my_game_infos(int profile_id, int game_id=-1)
         {
             string expression = $"SELECT * FROM {GameInfo._game_infos} " +
@@ -1032,7 +1125,7 @@ namespace WpfApp1.DBcore
         {
             DeletePublisher(publ.ID);
         }
-        static public void DeletePublisher(int id) 
+        static public void DeletePublisher(int id)
         {
             string expression = $"DELETE FROM {GamePublisher._game_publisher} " +
                     $"WHERE {GamePublisher._publisher_id}=@publisher_id;" +
@@ -1051,7 +1144,6 @@ namespace WpfApp1.DBcore
                 command.Parameters.Add(new SqliteParameter("@publisher_id", id));
                 command.ExecuteNonQuery();
             }
-
         }
         #endregion
     }

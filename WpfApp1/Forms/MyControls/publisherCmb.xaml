@@ -22,7 +22,7 @@
                   Grid.RowSpan="2"/>
         <Button Content="Add" Background="LightYellow"
                 Grid.Column="1" Margin="3" Click="PublisherCmb_Selected"/>
-        <Button Content="Del" Background="LightPink"
+        <Button Content="Del" Background="LightPink" Name="DelBtn"
                 Grid.Row="2" Grid.Column="1" Margin="3" Click="PublisherCmb_Delete"/>
     </Grid>
 </UserControl>

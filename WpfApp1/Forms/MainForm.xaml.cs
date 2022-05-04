@@ -20,7 +20,6 @@ namespace WpfApp1.Forms
     /// </summary>
     public partial class MainForm : Window
     {
-        private Profile _profile;
         private Window _login_form;
         private List<GameInfo> myGames = new();
 
@@ -28,10 +27,9 @@ namespace WpfApp1.Forms
         private GameInfo selectedGameInfo;
 
         private bool onlyMyGamesIsShow = true;
-        public MainForm(Profile profile, Window parent)
+        public MainForm(Window parent)
         {
             InitializeComponent();
-            _profile = profile;
             _login_form = parent;
 
             ShowMyGames();
@@ -70,29 +68,16 @@ namespace WpfApp1.Forms
             }
             else 
             {
-                timeInGameLabel.Content = $"0:00";
+                timeInGameLabel.Content = $"00:00";
                 PlayButton.IsEnabled = false;
                 selectedGameInfo = new();
             }
         }
 
-        private void ShowMyGames(object sender, RoutedEventArgs e)
+        private void FillGamePanel(List<Game> games)
         {
-            if (myGamesList == null) return;
-            
-            ShowMyGames();
-        }
+            if (myGamesList is null) return;
 
-        private void ShowAllGames(object sender, RoutedEventArgs e)
-        {
-            if (myGamesList == null) return;
-
-            ShowAllGames();
-        }
-
-        private void ShowAllGames()
-        {
-            List<Game> games = DBreader.Get_games();
             List<ListBoxItem> listBoxItems = new();
 
             foreach (var g in games)
@@ -107,23 +92,30 @@ namespace WpfApp1.Forms
             onlyMyGamesIsShow = false;
             myGamesList.ItemsSource = listBoxItems;
         }
+        private void ShowMyGames(object sender, RoutedEventArgs e)
+        {
+            ShowMyGames();
+        }
 
+        private void ShowAllGames(object sender, RoutedEventArgs e)
+        {
+            ShowAllGames();
+        }
+
+        private void ShowFilteredGames()
+        {
+            List<Game> games = advanceFilter.GetFilteredGames();
+            FillGamePanel(games);
+        }
+        private void ShowAllGames()
+        {
+            List<Game> games = DBreader.GetGamesByFilter(title:"", publID:null, isInstalled:null, myGames: null);
+            FillGamePanel(games);
+        }
         private void ShowMyGames()
         {
-            myGames = DBreader.Get_my_game_infos(_profile.ID);
-            List<ListBoxItem> listBoxItems = new();
-
-            foreach (var g in myGames)
-            {
-                ListBoxItem li = new();
-                li.Content = g.game_title;
-                li.DataContext = g.game_id;
-                li.Selected += LiSelected;
-                listBoxItems.Add(li);
-            };
-
-            onlyMyGamesIsShow = true;
-            myGamesList.ItemsSource = listBoxItems;
+            List<Game> games = DBreader.GetGamesByFilter(title:"", publID:null, isInstalled:null, myGames: true);
+            FillGamePanel(games);
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -133,7 +125,7 @@ namespace WpfApp1.Forms
 
         private void EditGameClick(object sender, RoutedEventArgs e)
         {
-            var editor = new EditGameForm(selectedGame.ID, _profile.ID);
+            var editor = new EditGameForm(selectedGame.ID);
             editor.ShowDialog();
 
             if (onlyMyGamesIsShow)
@@ -141,6 +133,25 @@ namespace WpfApp1.Forms
             else
                 ShowAllGames();
 
+        }
+        private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e) 
+        {
+            if (advanceFilter.Visibility == Visibility.Visible)
+            {
+                toggleFilterBtn.Content = "Show";
+                advanceFilter.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                toggleFilterBtn.Content = "Hide";
+                advanceFilter.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void advanceFilter_Apply(object sender, EventArgs e)
+        {
+            List<Game> games = ((MyControls.GameFilterEventArg)e).newGames;
+            FillGamePanel(games);
         }
     }
 }

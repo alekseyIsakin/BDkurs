@@ -82,7 +82,7 @@ namespace WpfApp1
             if (result)
             {
                 var p = DBreader.Get_profile(nick);
-                Forms.MainForm new_form = new(p, this);
+                Forms.MainForm new_form = new(this);
                 this.Hide();
                 new_form.ShowDialog();
                 Reset();
@@ -101,8 +101,7 @@ namespace WpfApp1
 
             if (result)
             {
-                var p = DBreader.Get_profile(nick);
-                Forms.MainForm new_form = new(p, this);
+                Forms.MainForm new_form = new(this);
                 Hide();
                 new_form.ShowDialog();
                 Reset();

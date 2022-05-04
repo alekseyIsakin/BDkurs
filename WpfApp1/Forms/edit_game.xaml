@@ -1,10 +1,10 @@
 ﻿<Window x:Class="WpfApp1.Forms.EditGameForm"
-        xmlns:uc="clr-namespace:WpfApp1.Forms.MyControls"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1.Forms"
+        xmlns:uc="clr-namespace:WpfApp1.Forms.MyControls"
         mc:Ignorable="d"
         Name="EditGameWindow"
         SizeToContent="Height"
@@ -36,7 +36,7 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
-                        <RowDefinition Height="80" x:Name="FilterRow"/>
+                        <RowDefinition Height="auto" x:Name="FilterRow"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
@@ -50,6 +50,18 @@
                     <ComboBox Name="GameComboBox" Grid.Column="1" Grid.Row="0"
                           VerticalAlignment="Center" Margin="3"/>
 
+                    <Label Content="Advanced filter" 
+                       Grid.Column="0" Grid.Row="1"
+                       Margin="3" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <Separator Margin="3"/>
+                        <uc:GameListFilter Visibility="Collapsed" Margin="3" x:Name="advanceFilter" ApplyClickEvent="advanceFilter_Apply"/>
+                        <Button Content="Show" Margin="3" Click="ToggleAdvanceFilter_Click"
+                            Name="toggleFilterBtn"
+                            Grid.Column="1" Grid.Row="1"/>
+                        <Separator Margin="3"/>
+                    </StackPanel>
+                    
                     <Label Content="Game title:" 
                        Grid.Column="0" Grid.Row="2"
                        Margin="3" VerticalAlignment="Center"/>
@@ -129,8 +141,6 @@
                 </DockPanel>
                 <Button Content="Clear" Click="DeleteGameInfoButton_Click"
                              Grid.Row="4" Grid.Column="0" Width="90" HorizontalAlignment="Left" Margin="3"/>
-
-                <uc:GameListFilter Grid.Column="1" Grid.Row="6"/>
             </Grid>
         </Grid>
     </DockPanel>

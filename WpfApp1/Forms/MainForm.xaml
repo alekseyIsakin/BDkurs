@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1.Forms"
+        xmlns:uc="clr-namespace:WpfApp1.Forms.MyControls"
         mc:Ignorable="d"
         Closed="Window_Closed"
         Title="Main" Height="450" Width="800">
@@ -14,7 +15,7 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="175"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
@@ -27,7 +28,12 @@
             </MenuItem>
         </Menu>
 
-        <DockPanel Grid.Row="1" Margin="3" Grid.Column="0" Grid.RowSpan="2">
+        <DockPanel Grid.Row="1" Margin="3,3,3,3" Grid.Column="0" Grid.RowSpan="2">
+            <Button DockPanel.Dock="Top" Content="Show filter" Margin="3" 
+                    Click="ToggleAdvanceFilter_Click"
+                    Name="toggleFilterBtn"/>
+            <uc:GameListFilter DockPanel.Dock="Top" Visibility="Collapsed" Margin="3"
+                               x:Name="advanceFilter" ApplyClickEvent="advanceFilter_Apply"/>
             <CheckBox Content="Only my games" Margin="3" DockPanel.Dock="Top" IsChecked="True"
                          Checked="ShowMyGames" Unchecked="ShowAllGames"/>
             <ListBox Name="myGamesList" DockPanel.Dock="Top"/>
@@ -61,7 +67,7 @@
                         Click="EditGameClick"
                         Grid.Column="5" Grid.Row="1" HorizontalAlignment="Left"/>
             </Grid>
-            
+
             <TextBlock Name="textDescription" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="3"/>
 
         </DockPanel>
