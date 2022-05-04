@@ -625,62 +625,74 @@ namespace WpfApp1.DBcore
         }
         static public List<Game> GetGamesByFilter(string title, List<int>? publID, bool? isInstalled, bool? myGames)
         {
+
             string expression = $"SELECT " +
                 $"{Game._games}.{Game._id},{Game._games}.{Game._title}," +
                 $"{Game._games}.{Game._descr},{Game._games}.{Game._relese_date} " +
                 $"FROM {Game._games} ";
-                
+
 
             SqliteDataReader gamesReader;
             Stack<SqliteParameter> param = new();
             List<Game> games = new();
+
             Stack<string> expressionWhere = new();
 
             if (title != "")
             {
-                expressionWhere.Push($" ({Game._title} like @title) ");
+                expression += $" Where ({Game._title} like @title) ";
                 param.Push(new("@title", title + '%'));
+            }
+
+            if ((myGames.HasValue && myGames.Value) || (myGames.HasValue == false && isInstalled.HasValue))
+            {
+                expression += "INTERSECT ";
+                expression += $"SELECT " +
+                    $"{Game._games}.{Game._id},{Game._games}.{Game._title}," +
+                    $"{Game._games}.{Game._descr},{Game._games}.{Game._relese_date} " +
+                    $"FROM {Game._games} " +
+                    $"LEFT JOIN {GameInfo._game_infos} ON {GameInfo._game_infos}.{GameInfo._game_id}={Game._games}.{Game._id} " + 
+                    $"WHERE {Profile._id}=@profile_id ";
+
+                if (isInstalled.HasValue) 
+                {
+                    expression += " AND ";
+                    expression += isInstalled.Value ? " NOT " : " ";
+                    expression += $"{GameInfo._executable_file}=\'\' ";
+                }
+
+                param.Push(new SqliteParameter("@profile_id", ActiveProfile.ID));
             }
 
             if (publID?.Count > 0)
             {
-                string tmp = $"(";
+                expression += "INTERSECT ";
+                expression += $"SELECT " +
+                    $"{Game._games}.{Game._id},{Game._games}.{Game._title}," +
+                    $"{Game._games}.{Game._descr},{Game._games}.{Game._relese_date} " +
+                    $"FROM {Game._games} " +
+                    $"LEFT JOIN {GamePublisher._game_publisher} ON {GamePublisher._game_publisher}.{GamePublisher._game_id}={Game._games}.{Game._id} " +
+                    $"WHERE (";
+
                 for (int i = 0; i < publID.Count; i++)
                 {
                     string or = i < publID.Count - 1 ? " OR " : "";
-                    tmp += $" {GamePublisher._publisher_id}=@publ{i}" + or;
+                    expression += $" {GamePublisher._publisher_id}=@publ{i}" + or;
                     param.Push(new($"@publ{i}", publID[i]));
                 }
-                tmp += ")";
-                expressionWhere.Push(tmp);
+                expression += ") ";
             }
 
-            if (isInstalled != null)
+            if (myGames.HasValue && myGames.Value == false)
             {
-                string tmp = isInstalled.Value ? "NOT " : " ";
-                tmp += $"{GameInfo._executable_file}=\'\' ";
-                expressionWhere.Push(tmp);
-            }
-
-            if (myGames != null)
-            {
-                expression += $"LEFT JOIN {GameInfo._game_infos} ON {GameInfo._game_infos}.{GameInfo._game_id}={Game._games}.{Game._id} ";
-                if (myGames == true) 
-                    expressionWhere.Push($" ({Profile._id}=@profile_id) ");
+                expression += "EXCEPT ";
+                expression += $"SELECT " +
+                    $"{Game._games}.{Game._id},{Game._games}.{Game._title}," +
+                    $"{Game._games}.{Game._descr},{Game._games}.{Game._relese_date} " +
+                    $"FROM {Game._games} " +
+                    $"LEFT JOIN {GameInfo._game_infos} ON {GameInfo._game_infos}.{GameInfo._game_id}={Game._games}.{Game._id} " +
+                    $"WHERE {Profile._id}=@profile_id ";
                 param.Push(new SqliteParameter("@profile_id", ActiveProfile.ID));
-            }
-
-            if (expressionWhere.Count > 0)
-                expression += " WHERE ";
-
-            while (expressionWhere.Count > 0)
-            {
-                string and = expressionWhere.Count > 1 ? " AND " : "";
-                expression += expressionWhere.Pop() + and;
-            }
-
-            if (myGames != null && myGames == false)
-            {
             }
 
             expression += ";";

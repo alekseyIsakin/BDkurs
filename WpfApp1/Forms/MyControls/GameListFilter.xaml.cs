@@ -87,7 +87,7 @@ namespace WpfApp1.Forms.MyControls
             foreach (var p in publishersFilter)
                 publID.Add(p.ID);
 
-            return DBreader.GetGamesByFilter(title, publID, isInstalled, DBreader.ActiveProfile.ID);
+            return DBreader.GetGamesByFilter(title, publID, isInstalled, inMyLibrary);
         }
 
         private void titleEnable_Click(object sender, RoutedEventArgs e)
