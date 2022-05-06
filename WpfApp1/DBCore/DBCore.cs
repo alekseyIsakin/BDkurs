@@ -681,6 +681,7 @@ namespace WpfApp1.DBcore
                     param.Push(new($"@publ{i}", publID[i]));
                 }
                 expression += ") ";
+                expression += $"Group by {Game._games}.{Game._id}";
             }
 
             if (myGames.HasValue && myGames.Value == false)

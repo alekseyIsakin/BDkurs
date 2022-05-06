@@ -25,6 +25,7 @@ namespace WpfApp1.Forms
 
         private Game selectedGame;
         private GameInfo selectedGameInfo;
+        private DateTime lastRunningTime;
 
         private bool onlyMyGamesIsShow = true;
         public MainForm(Window parent)
@@ -140,19 +141,24 @@ namespace WpfApp1.Forms
             ReloadMyGames();
             advanceFilter.ReloadPublishers();
         }
-        private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e) 
+        private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e)
+        {
+            FilterVisibility(test.IsOpen);
+        }
+
+        private void FilterVisibility(bool state)
         {
             test.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
-            
-            if (test.IsOpen)
-            {
-                toggleFilterBtn.Content = "Show Filter";
-                test.IsOpen = false;
-            }
-            else
+
+            if (state)
             {
                 toggleFilterBtn.Content = "Hide";
                 test.IsOpen = true;
+            }
+            else
+            {
+                toggleFilterBtn.Content = "Show Filter";
+                test.IsOpen = false;
             }
         }
 
@@ -162,10 +168,12 @@ namespace WpfApp1.Forms
             FillGamePanel(games);
         }
 
-        DateTime lastRunningTime;
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             if (selectedGameInfo.executable_file == "") return;
+
+            BackUpSaveFile(".backup1");
+            FilterVisibility(false);
             lastRunningTime = DateTime.Now;
             WindowState = WindowState.Minimized;
 
@@ -188,10 +196,9 @@ namespace WpfApp1.Forms
             });
             thread.Start();
         }
-
         private void ThreadEnd()
         {
-            this.Dispatcher.Invoke(()=> 
+            this.Dispatcher.Invoke(()=>
             {
                 TimeSpan gameTime = DateTime.Now - lastRunningTime;
                 selectedGameInfo.time_in_game += (ulong)gameTime.TotalMinutes;
@@ -204,7 +211,24 @@ namespace WpfApp1.Forms
                     ShowAllGames();
                 UpdateGameUIByID();
                 WindowState = WindowState.Normal;
+
+                BackUpSaveFile(".backup2");
             });
+        }
+
+        private void BackUpSaveFile(string postfix = "")
+        {
+            if (selectedGameInfo.save_file != "")
+            {
+                try
+                {
+                    System.IO.File.Copy(selectedGameInfo.save_file, selectedGameInfo.save_file + postfix, overwrite: true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Backup saveFile error: [{ ex.Message}]");
+                }
+            }
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
