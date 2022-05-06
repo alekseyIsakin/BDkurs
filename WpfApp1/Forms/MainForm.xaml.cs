@@ -32,6 +32,7 @@ namespace WpfApp1.Forms
             InitializeComponent();
             _login_form = parent;
             ReloadMyGames();
+            advanceFilter.ReloadPublishers();
             ShowMyGames();
         }
 
@@ -137,18 +138,21 @@ namespace WpfApp1.Forms
                 ShowAllGames();
 
             ReloadMyGames();
+            advanceFilter.ReloadPublishers();
         }
         private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e) 
         {
-            if (advanceFilter.Visibility == Visibility.Visible)
+            test.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
+            
+            if (test.IsOpen)
             {
-                toggleFilterBtn.Content = "Show";
-                advanceFilter.Visibility = Visibility.Collapsed;
+                toggleFilterBtn.Content = "Show Filter";
+                test.IsOpen = false;
             }
             else
             {
                 toggleFilterBtn.Content = "Hide";
-                advanceFilter.Visibility = Visibility.Visible;
+                test.IsOpen = true;
             }
         }
 
@@ -201,6 +205,17 @@ namespace WpfApp1.Forms
                 UpdateGameUIByID();
                 WindowState = WindowState.Normal;
             });
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            if (!test.IsOpen)
+                return;
+
+            if (test.VerticalOffset == 0.1)
+                test.VerticalOffset = 0;
+            else
+                test.VerticalOffset = 0.1;
         }
     }
 }

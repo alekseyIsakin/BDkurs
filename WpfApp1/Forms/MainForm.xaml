@@ -7,6 +7,7 @@
         xmlns:uc="clr-namespace:WpfApp1.Forms.MyControls"
         mc:Ignorable="d"
         Closed="Window_Closed"
+        LocationChanged="Window_LocationChanged"
         Title="Main" Height="450" Width="800">
     <Grid >
         <Grid.RowDefinitions>
@@ -29,13 +30,17 @@
         </Menu>
 
         <DockPanel Grid.Row="1" Margin="3,3,3,3" Grid.Column="0" Grid.RowSpan="2">
+            <Popup Name="test" Visibility="Collapsed">
+                <uc:GameListFilter Margin="3"
+                               x:Name="advanceFilter" ApplyClickEvent="advanceFilter_Apply"/>
+            </Popup>
+
+            <ScrollViewer DockPanel.Dock="Top" Visibility="Collapsed" MaxHeight="250" HorizontalScrollBarVisibility="Visible"
+                          x:Name="advanceFilterScroller" >
+            </ScrollViewer>
             <Button DockPanel.Dock="Top" Content="Show filter" Margin="3" 
                     Click="ToggleAdvanceFilter_Click"
                     Name="toggleFilterBtn"/>
-            <uc:GameListFilter DockPanel.Dock="Top" Visibility="Collapsed" Margin="3"
-                               x:Name="advanceFilter" ApplyClickEvent="advanceFilter_Apply"/>
-            <CheckBox Content="Only my games" Margin="3" DockPanel.Dock="Top" IsChecked="True"
-                         Checked="ShowMyGames" Unchecked="ShowAllGames"/>
             <ListBox Name="myGamesList" DockPanel.Dock="Top"/>
         </DockPanel>
 

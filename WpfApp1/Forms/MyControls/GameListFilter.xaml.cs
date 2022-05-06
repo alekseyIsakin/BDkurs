@@ -50,6 +50,12 @@ namespace WpfApp1.Forms.MyControls
             publishersFilter.Add(publ);
             AddPublisher(publ);
         }
+
+        internal void ReloadPublishers()
+        {
+            publisherFilter.ReloadPublishers();
+        }
+
         private void AddPublisher(Publisher publ)
         {
             publisherSetter publControl = new() { publisher = publ };

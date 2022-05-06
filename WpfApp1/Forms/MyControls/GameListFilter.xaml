@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:WpfApp1.Forms.MyControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="WhiteSmoke">
+    <Grid Background="#f2f3f4">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="auto"/>
