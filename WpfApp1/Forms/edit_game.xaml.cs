@@ -142,7 +142,7 @@ namespace WpfApp1.Forms
         }
         private void FillGameListUI(List<Game> games)
         {
-            games.Sort((v1, v2) => string.Compare(v1.Title, v2.Title, StringComparison.Ordinal));
+            //games.Sort((v1, v2) => string.Compare(v1.Title, v2.Title, StringComparison.Ordinal));
             games.Add(Game.EMPTY);
 
             List<ComboBoxItem> listBoxItems = new();
@@ -402,6 +402,7 @@ namespace WpfApp1.Forms
         {
             List<Game> games = ((MyControls.GameFilterEventArg)e).newGames;
             FillGameListUI(games);
+            GameComboBox.SelectedIndex = 0;
         }
     }
 }

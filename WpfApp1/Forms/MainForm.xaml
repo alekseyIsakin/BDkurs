@@ -30,9 +30,14 @@
         </Menu>
 
         <DockPanel Grid.Row="1" Margin="3,3,3,3" Grid.Column="0" Grid.RowSpan="2">
-            <Popup Name="test" Visibility="Collapsed" MinWidth="250">
-                <uc:GameListFilter Margin="3"
+            <Popup Name="filterPopup" Visibility="Collapsed" MinWidth="250" >
+                <DockPanel Background="#f2f3f4">
+
+                    <uc:GameListFilter DockPanel.Dock="Top"
                                x:Name="advanceFilter" ApplyClickEvent="advanceFilter_Apply"/>
+                    <Button Content="Hide" Click="Button_Click" DockPanel.Dock="Bottom" Margin="3"/>
+
+                </DockPanel>
             </Popup>
             <Button DockPanel.Dock="Top" Content="Show filter" Margin="3" 
                     Click="ToggleAdvanceFilter_Click"

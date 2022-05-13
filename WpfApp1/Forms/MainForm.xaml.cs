@@ -143,22 +143,22 @@ namespace WpfApp1.Forms
         }
         private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e)
         {
-            FilterVisibility(test.IsOpen);
+            SetFilterVisibility(!filterPopup.IsOpen);
         }
 
-        private void FilterVisibility(bool state)
+        private void SetFilterVisibility(bool state)
         {
-            test.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
+            filterPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
 
             if (state)
             {
                 toggleFilterBtn.Content = "Hide";
-                test.IsOpen = true;
+                filterPopup.IsOpen = true;
             }
             else
             {
                 toggleFilterBtn.Content = "Show Filter";
-                test.IsOpen = false;
+                filterPopup.IsOpen = false;
             }
         }
 
@@ -173,7 +173,7 @@ namespace WpfApp1.Forms
             if (selectedGameInfo.executable_file == "") return;
 
             BackUpSaveFile(".backup1");
-            FilterVisibility(false);
+            SetFilterVisibility(false);
             lastRunningTime = DateTime.Now;
             WindowState = WindowState.Minimized;
 
@@ -233,13 +233,18 @@ namespace WpfApp1.Forms
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            if (!test.IsOpen)
+            if (!filterPopup.IsOpen)
                 return;
 
-            if (test.VerticalOffset == 0.1)
-                test.VerticalOffset = 0;
+            if (filterPopup.VerticalOffset == 0.1)
+                filterPopup.VerticalOffset = 0;
             else
-                test.VerticalOffset = 0.1;
+                filterPopup.VerticalOffset = 0.1;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            SetFilterVisibility(false);
         }
     }
 }

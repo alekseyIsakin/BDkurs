@@ -26,6 +26,18 @@ namespace WpfApp1.Forms.MyControls
         {
             InitializeComponent();
             publisherFilter.DisableDelBtn();
+
+            comboSort.Items.Clear();
+
+            foreach ((string, int) sortEl in DBreader.GetSortListStrings) 
+            {
+                ComboBoxItem it = new();
+                it.Content = sortEl.Item1;
+                it.Tag = sortEl.Item2;
+
+                comboSort.Items.Add(it);
+            }
+
         }
 
         private void publisherFilter_PublisherCmbSelected(object sender, EventArgs e)
@@ -84,16 +96,20 @@ namespace WpfApp1.Forms.MyControls
             List<int> publID = new();
             bool? isInstalled = null;
             bool? inMyLibrary = null;
+            bool orderDir = checkSortDirection.IsChecked ?? false;
+            int orderBy = 0;
 
-            if (inMyLibraryCheck.IsEnabled)
-                inMyLibrary = inMyLibraryCheck.IsChecked;
-            if (installedCheck.IsEnabled)
-                isInstalled = installedCheck.IsChecked;
+            if (checkInMyLibrary.IsEnabled)
+                inMyLibrary = checkInMyLibrary.IsChecked;
+            if (checkInstalled.IsEnabled)
+                isInstalled = checkInstalled.IsChecked;
 
             foreach (var p in publishersFilter)
                 publID.Add(p.ID);
 
-            return DBreader.GetGamesByFilter(title, publID, isInstalled, inMyLibrary);
+            orderBy = Convert.ToInt32(((ComboBoxItem)comboSort.SelectedItem).Tag);
+
+            return DBreader.GetGamesByFilter(title, publID, isInstalled, inMyLibrary, (DBreader.ORDER_BY)orderBy, orderDir);
         }
 
         private void titleEnable_Click(object sender, RoutedEventArgs e)
@@ -104,11 +120,19 @@ namespace WpfApp1.Forms.MyControls
 
         private void InstalledEnable_Click(object sender, RoutedEventArgs e)
         {
-            installedCheck.IsEnabled = !installedCheck.IsEnabled;
+            checkInstalled.IsEnabled = !checkInstalled.IsEnabled;
         }
         private void inMyLibraryEnable_Click(object sender, RoutedEventArgs e)
         {
-            inMyLibraryCheck.IsEnabled = !inMyLibraryCheck.IsEnabled;
+            checkInMyLibrary.IsEnabled = !checkInMyLibrary.IsEnabled;
+        }
+
+        private void checkSortDirection_Click(object sender, RoutedEventArgs e)
+        {
+            if (checkSortDirection.IsChecked ?? false)
+                checkSortDirection.ToolTip = "Sort UP";
+            else
+                checkSortDirection.ToolTip = "Sort DOWN";
         }
     }
 }

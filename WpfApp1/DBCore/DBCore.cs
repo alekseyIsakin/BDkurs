@@ -107,9 +107,17 @@ namespace WpfApp1.DBcore
         public static readonly string db_name = "data.db";
         private static readonly string connectStr;
 
+        public enum ORDER_BY 
+        {
+            TITLE,
+            RELEASE_DATE,
+        }
 
         public static bool IsCreate => System.IO.File.Exists(db_name);
-
+        public static List<(string, ORDER_BY)> GetSortListStrings => new List<(string, ORDER_BY)> { 
+            ("Title", ORDER_BY.TITLE),
+            ("Release date", ORDER_BY.RELEASE_DATE)
+        };
         public static Profile ActiveProfile { get; private set; }
 
         static DBreader()
@@ -623,7 +631,8 @@ namespace WpfApp1.DBcore
 
             return game;
         }
-        static public List<Game> GetGamesByFilter(string title, List<int>? publID, bool? isInstalled, bool? myGames)
+        static public List<Game> GetGamesByFilter(string title, List<int>? publID, bool? isInstalled, bool? myGames,
+            ORDER_BY orderBy = ORDER_BY.TITLE, bool direction = false)
         {
 
             string expression = $"SELECT " +
@@ -696,6 +705,20 @@ namespace WpfApp1.DBcore
                 param.Push(new SqliteParameter("@profile_id", ActiveProfile.ID));
             }
 
+            expression += $" ORDER BY ";
+            switch (orderBy) 
+            {
+                case ORDER_BY.RELEASE_DATE:
+                    expression += $" {Game._games}.{Game._relese_date} ";
+                    direction = !direction;
+                    break;
+                case ORDER_BY.TITLE:
+                default:
+                    expression += $" {Game._games}.{Game._title} ";
+                    break;
+            }
+            if (direction)
+                expression += "DESC";
             expression += ";";
 
             using (var connection = new SqliteConnection(connectStr + "Mode=ReadWrite;"))

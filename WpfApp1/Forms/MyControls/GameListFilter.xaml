@@ -16,6 +16,7 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition />
+            <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -36,16 +37,24 @@
 
         </Grid>
 
-        <CheckBox x:Name="installedCheck" Content="Installed"  VerticalAlignment="Center" Margin="3" IsEnabled="False"
+        <CheckBox x:Name="checkInstalled" Content="Installed"  VerticalAlignment="Center" Margin="3" IsEnabled="False"
                  Grid.Row="2"/>
-        <CheckBox x:Name="InstalledEnable" VerticalAlignment="Center" Click="InstalledEnable_Click"
+        <CheckBox x:Name="checkEnableInstalled" VerticalAlignment="Center" Click="InstalledEnable_Click"
                   Grid.Row="2" Grid.Column="1"/>
-        
-        <CheckBox x:Name="inMyLibraryCheck" Content="InMyLibrary"  VerticalAlignment="Center" Margin="3" IsEnabled="False"
+
+        <CheckBox x:Name="checkInMyLibrary" Content="InMyLibrary"  VerticalAlignment="Center" Margin="3" IsEnabled="False"
                  Grid.Row="3"/>
-        <CheckBox x:Name="inMyLibraryEnable" VerticalAlignment="Center" Click="inMyLibraryEnable_Click"
+        <CheckBox VerticalAlignment="Center" Click="inMyLibraryEnable_Click"
                   Grid.Row="3" Grid.Column="1"/>
 
-        <Button Grid.Row="4" Margin="3" Content="Apply" Click="ButtonApply_Click"/>
+        <ComboBox Name="comboSort" SelectedIndex="0" VerticalAlignment="Center" Margin="3"
+                  ToolTip="sort by"
+                  Grid.Row="4" Grid.Column="0">
+        </ComboBox>
+        <CheckBox x:Name="checkSortDirection" VerticalAlignment="Center"
+                  Grid.Row="4" Grid.Column="1" Click="checkSortDirection_Click"/>
+
+        <Button Grid.Row="5" Margin="3" Grid.ColumnSpan="2" 
+                Content="Apply" Click="ButtonApply_Click"/>
     </Grid >
 </UserControl>
