@@ -1,8 +1,7 @@
 {
   "profiles": {
     "WpfApp1": {
-      "commandName": "Project",
-      "commandLineArgs": "www"
+      "commandName": "Project"
     }
   }
 }

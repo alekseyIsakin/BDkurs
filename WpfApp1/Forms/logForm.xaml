@@ -31,7 +31,7 @@
                  VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,6,0,0"
                  Grid.Column="2" Grid.Row="1"
                  Width="150" MaxLength="25" />
-        <TextBox x:Name="PasswTextBox" Text="" Height="20" TextWrapping="Wrap" 
+        <PasswordBox x:Name="PasswTextBox" Height="20"
                  VerticalAlignment="Center" HorizontalAlignment="Center"
                  Grid.Column="2" Grid.Row="2"
                  Width="150" MaxLength="25" />

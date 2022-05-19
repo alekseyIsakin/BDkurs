@@ -21,7 +21,7 @@ namespace WpfApp1.Forms
     public partial class MainForm : Window
     {
         private Window _login_form;
-        private List<GameInfo> myGames = new();
+        private List<GameInfo> myGames => DBreader.Get_my_game_infos(DBreader.ActiveProfile.ID);
 
         private Game selectedGame;
         private GameInfo selectedGameInfo;
@@ -32,24 +32,19 @@ namespace WpfApp1.Forms
         {
             InitializeComponent();
             _login_form = parent;
-            ReloadMyGames();
-            advanceFilter.ReloadPublishers();
-            ShowMyGames();
-        }
 
-        private void ReloadMyGames()
-        {
-            myGames = DBreader.Get_my_game_infos(DBreader.ActiveProfile.ID);
+            advanceFilter.ReloadPublishers();
+            FillGamePanel(advanceFilter.GetFilteredGames());
         }
 
         private void LiSelected(object sender, RoutedEventArgs e)
         {
             int id = Convert.ToInt32((sender as ListBoxItem).DataContext);
             selectedGame = DBreader.Get_Game(id);
-            UpdateGameUIByID();
+            UpdateGameRepr();
         }
 
-        private void UpdateGameUIByID()
+        private void UpdateGameRepr()
         {
             labelGameTitle.Content = selectedGame.Title;
 
@@ -133,13 +128,14 @@ namespace WpfApp1.Forms
             var editor = new EditGameForm(selectedGame.ID);
             editor.ShowDialog();
 
-            if (onlyMyGamesIsShow)
-                ShowMyGames();
-            else
-                ShowAllGames();
-
-            ReloadMyGames();
+            //if (onlyMyGamesIsShow)
+            //    ShowMyGames();
+            //else
+            //    ShowAllGames();
+            //ReloadMyGames();
             advanceFilter.ReloadPublishers();
+            FillGamePanel(GetFilteredGames());
+            UpdateGameRepr();
         }
         private void ToggleAdvanceFilter_Click(object sender, RoutedEventArgs e)
         {
@@ -161,7 +157,10 @@ namespace WpfApp1.Forms
                 filterPopup.IsOpen = false;
             }
         }
-
+        private List<Game> GetFilteredGames()
+        {
+            return advanceFilter.GetFilteredGames();
+        }
         private void advanceFilter_Apply(object sender, EventArgs e)
         {
             List<Game> games = ((MyControls.GameFilterEventArg)e).newGames;
@@ -204,12 +203,12 @@ namespace WpfApp1.Forms
                 selectedGameInfo.time_in_game += (ulong)gameTime.TotalMinutes;
                 DBreader.UpdateMyGame(selectedGameInfo);
 
-                ReloadMyGames();
+                //ReloadMyGames();
                 if (onlyMyGamesIsShow)
                     ShowMyGames();
                 else
                     ShowAllGames();
-                UpdateGameUIByID();
+                UpdateGameRepr();
                 WindowState = WindowState.Normal;
 
                 BackUpSaveFile(".backup2");
@@ -230,7 +229,6 @@ namespace WpfApp1.Forms
                 }
             }
         }
-
         private void Window_LocationChanged(object sender, EventArgs e)
         {
             if (!filterPopup.IsOpen)
@@ -241,7 +239,6 @@ namespace WpfApp1.Forms
             else
                 filterPopup.VerticalOffset = 0.1;
         }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             SetFilterVisibility(false);

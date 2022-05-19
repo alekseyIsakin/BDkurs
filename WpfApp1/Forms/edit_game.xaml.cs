@@ -338,6 +338,11 @@ namespace WpfApp1.Forms
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e) 
         {
+            var res = MessageBox.Show($"Delete [{selectedGame.Title}] from library? This action cannot be undone", "Warning!", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.No)
+                return;
+
             string msg = "Game has been removed from library";
             int selected_ind = GameComboBox.SelectedIndex;
             if (selectedGame.ID != -1) 

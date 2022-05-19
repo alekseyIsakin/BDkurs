@@ -12,7 +12,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         private string _nickTextBox { get => NickTextBox.Text; }
-        private string _passwTextBox { get => PasswTextBox.Text; }
+        private string _passwTextBox { get => PasswTextBox.Password; }
 
         private void Reset() 
         {
